@@ -46,7 +46,7 @@ log/
 htmlcov/
 .pytest_cache/
 assets/
-tests/
+#tests/
 
 # media
 media/
