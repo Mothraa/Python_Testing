@@ -50,3 +50,6 @@ media/
 
 # databases
 *.sqlite3
+
+# flask
+.flaskenv
