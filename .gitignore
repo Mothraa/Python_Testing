@@ -1,7 +1,52 @@
-bin
+# virtual environment python subfolder
+.venv/
+.env/
+venv/
+env/
+pipfile
+pipfile.lock
+.envrc
+
+# python
 include
 lib
+bin
 .Python
-tests/
-.envrc
+
+# visual studio code
+.vscode/
+
+# Windows thumbnails and links
+Thumbs.db
+._*
+*.lnk
+
+# backups
+*.bak
+
+# output subfolders
 __pycache__
+__pycache__/
+.result/
+result/
+.output/
+output/
+.log/
+log/
+
+
+# ignore all log files
+*.log
+
+# tests
+.coverage/
+htmlcov/
+.pytest_cache/
+assets/
+tests/
+
+# media
+media/
+
+# databases
+*.sqlite3
