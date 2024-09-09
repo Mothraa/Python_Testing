@@ -1,6 +1,7 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 
+from services import load_club_data, load_competition_data
 # # moved to services.py
 # def loadClubs():
 #     with open('clubs.json') as c:
@@ -16,8 +17,8 @@ from flask import Flask,render_template,request,redirect,flash,url_for
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
-competitions = loadCompetitions()
-clubs = loadClubs()
+competitions = load_competition_data()
+clubs = load_club_data()
 
 @app.route('/')
 def index():
