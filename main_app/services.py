@@ -3,13 +3,13 @@ import json
 # lecture et enregistrement des json
 
 
-def loadClubs():
-    with open('clubs.json') as c:
-         listOfClubs = json.load(c)['clubs']
-         return listOfClubs
+def load_club_data():
+    with open('clubs.json') as f:
+         clubs_list = json.load(f)['clubs']
+         return clubs_list
 
 
-def loadCompetitions():
-    with open('competitions.json') as comps:
-         listOfCompetitions = json.load(comps)['competitions']
-         return listOfCompetitions
+def load_competition_data():
+    with open('competitions.json') as f:
+         competitions_list = json.load(f)['competitions']
+         return competitions_list
