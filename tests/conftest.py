@@ -1,11 +1,11 @@
 import pytest
 
 from main_app import create_app
-
+#from unittest.mock import MagicMock  # pour des objets complexes
 
 @pytest.fixture
 def client():
-    """ Pour simuler les requêtes client (GET/POST)"""
+    """ For simulating client requests (GET/POST)"""
     app = create_app({"TESTING": True})
     with app.test_client() as client:
         yield client
@@ -46,6 +46,23 @@ def mock_competitions():
         }
     ]
 
+
+@pytest.fixture
+def mock_open_missing_file(monkeypatch):
+
+    def mock_open(*args, **kwargs):
+        raise FileNotFoundError
+    
+    monkeypatch.setattr('builtins.open', mock_open)
+
+
+@pytest.fixture
+def mock_open_corrupted_file(monkeypatch):
+
+    def mock_open(*args, **kwargs):
+        raise FileNotFoundError
+    
+    monkeypatch.setattr('builtins.open', mock_open)
 
 # class TestClass:
 #     def setup_method(self, method):
