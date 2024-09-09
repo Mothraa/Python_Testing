@@ -1,4 +1,3 @@
-import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 
 from services import load_club_data, load_competition_data
