@@ -3,7 +3,7 @@ import json
 # lecture et enregistrement des json
 
 
-# TODO : regrouper la lecture du json dans la meme fonction ?
+# TODO : regrouper la lecture du json dans la meme classe ?
 def load_club_data(filename='clubs.json'):
     try:
         with open(filename, 'r') as f:
