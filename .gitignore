@@ -1,5 +1,6 @@
-# virtual environment python subfolder
+# virtual environment python files and subfolders
 .venv/
+.env
 .env/
 venv/
 env/

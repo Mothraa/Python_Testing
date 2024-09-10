@@ -15,8 +15,9 @@ from services import load_club_data, load_competition_data
 #          return listOfCompetitions
 
 
-app = Flask(__name__)
-app.secret_key = 'something_special'
+# app = Flask(__name__)
+# # moved to config.py
+# app.secret_key = 'something_special'
 
 # TODO : move json load to __init__
 competitions = load_competition_data()
