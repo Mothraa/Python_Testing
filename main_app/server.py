@@ -24,11 +24,11 @@ from flask import Flask,render_template,request,redirect,flash,url_for
 
 
 
-
-@app.route('/')
-def index():
-    # print("DEBUG test")
-    return render_template('index.html')
+# # moved to routes.py
+# @app.route('/')
+# def index():
+#     # print("DEBUG test")
+#     return render_template('index.html')
 
 
 @app.route('/showSummary',methods=['POST'])

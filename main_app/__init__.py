@@ -2,6 +2,7 @@ import os
 from flask import Flask
 
 from .services import JSONLoader
+from .routes import bp as main_app_bp
 
 
 def create_app(config_filename='config.py'):
@@ -14,10 +15,10 @@ def create_app(config_filename='config.py'):
     app.config.from_pyfile(config_path)
     # print(app.config)
     # print(app.config.get('JSON_CLUBS_PATH'))
-
+    app.register_blueprint(main_app_bp)
     # Importe et enregistre les routes et les vues
     with app.app_context():
-        from . import routes  # Importer les routes
+        # from . import routes  # Importer les routes
         # from . import server # import du code en cours de refacto
 
         # chargement des données JSON
