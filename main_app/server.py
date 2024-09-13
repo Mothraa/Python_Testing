@@ -1,7 +1,5 @@
 from flask import Flask,render_template,request,redirect,flash,url_for
 
-from services import load_club_data, load_competition_data
-
 
 # # moved to services.py
 # def loadClubs():
@@ -16,16 +14,22 @@ from services import load_club_data, load_competition_data
 
 
 # app = Flask(__name__)
+
 # # moved to config.py
 # app.secret_key = 'something_special'
 
-# TODO : move json load to __init__
-competitions = load_competition_data()
-clubs = load_club_data()
+# move json load to __init__
+# competitions = load_competition_data()
+# clubs = load_club_data()
+
+
+
 
 @app.route('/')
 def index():
+    # print("DEBUG test")
     return render_template('index.html')
+
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():

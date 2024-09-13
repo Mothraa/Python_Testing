@@ -1,18 +1,28 @@
+import os
 from flask import Flask
 
-from services import load_club_data, load_competition_data
+from .services import JSONLoader
+
 
 def create_app(config_filename='config.py'):
     app = Flask(__name__)
 
-    # Charge la configuration de l'application depuis config.py
-    app.config.from_object(config_filename) 
+    # Chargement de la configuration
+    project_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    config_path = os.path.join(project_dir, 'config.py')
+
+    app.config.from_pyfile(config_path)
+    # print(app.config)
+    # print(app.config.get('JSON_CLUBS_PATH'))
 
     # Importe et enregistre les routes et les vues
     with app.app_context():
         from . import routes  # Importer les routes
+        # from . import server # import du code en cours de refacto
 
-    # TODO : load json data => comment déclarer ? object data ? flask app.config ?
-    # competitions = load_competition_data()
-    # clubs = load_club_data()
+        # chargement des données JSON
+        data_loader = JSONLoader()
+        clubs = data_loader.get_clubs()
+        competitions = data_loader.get_competitions()
+
     return app

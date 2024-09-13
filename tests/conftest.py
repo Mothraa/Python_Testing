@@ -5,11 +5,23 @@ from unittest.mock import mock_open
 import pytest
 
 from main_app import create_app
+from main_app.services import JSONLoader
+
+
+@pytest.fixture
+def app():
+    """Create an application instance for testing"""
+    app = create_app({
+                      "TESTING": True,
+                      })
+    with app.app_context():
+        yield app
 
 
 @pytest.fixture
 def client():
-    """ For simulating client requests (GET/POST)"""
+    """ For simulating client requests (GET/POST)
+        for routing or integrating tests """
     app = create_app({"TESTING": True})
     with app.test_client() as client:
         yield client
@@ -74,12 +86,28 @@ def mock_json_with_wrong_key(monkeypatch):
     json_data = json.dumps({"wrong_key": "value_we_dont_care"})
     monkeypatch.setattr('builtins.open', mock_open(read_data=json_data))
 
-# class TestClass:
-#     def setup_method(self, method):
-#         print("--> Setup method")
 
-#     def teardown_method(self, method):
-#         print("\n--> Teardown method")
+# TODO : a déplacer dans test_services ?
+@pytest.fixture
+def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
+    """ Fixture to simulate services.JSONLoader"""
+    with app.app_context():
+        # Simulation du chemin des fichiers json dans app.config
+        app.config['json_clubs_path'] = 'repertory/mock_clubs.json'
+        app.config['json_competitions_path'] = 'repertory/mock_competitions.json'
 
-#     def test_one(self):
-#         print("--> Run first test")
+        # json_loader_instance = JSONLoader()
+
+        # for mocking JSONLoader._load_data
+        def mock_load_data(self, filename, key):
+            if key == 'clubs':
+                return mock_clubs
+            elif key == 'competitions':
+                return mock_competitions
+            return []
+
+        monkeypatch.setattr(JSONLoader, '_load_data', mock_load_data)
+        # monkeypatch.setattr(json_loader_instance, '_load_data', mock_load_data)
+
+    return JSONLoader()
+    # return json_loader_instance
