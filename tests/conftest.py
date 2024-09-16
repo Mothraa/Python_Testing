@@ -11,9 +11,10 @@ from main_app.services import JSONLoader
 @pytest.fixture
 def app():
     """Create an application instance for testing"""
-    app = create_app({
-                      "TESTING": True,
-                      })
+    app = create_app()
+    app.config.update({
+        "TESTING": True,
+    })
     with app.app_context():
         yield app
 
@@ -22,7 +23,10 @@ def app():
 def client():
     """ For simulating client requests (GET/POST)
         for routing or integrating tests """
-    app = create_app({"TESTING": True})
+    app = create_app()
+    app.config.update({
+        "TESTING": True,
+    })
     with app.test_client() as client:
         yield client
 
@@ -96,8 +100,6 @@ def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
         app.config['json_clubs_path'] = 'repertory/mock_clubs.json'
         app.config['json_competitions_path'] = 'repertory/mock_competitions.json'
 
-        # json_loader_instance = JSONLoader()
-
         # for mocking JSONLoader._load_data
         def mock_load_data(self, filename, key):
             if key == 'clubs':
@@ -107,7 +109,5 @@ def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
             return []
 
         monkeypatch.setattr(JSONLoader, '_load_data', mock_load_data)
-        # monkeypatch.setattr(json_loader_instance, '_load_data', mock_load_data)
 
     return JSONLoader()
-    # return json_loader_instance
