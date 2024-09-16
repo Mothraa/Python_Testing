@@ -30,3 +30,13 @@ def test_email_not_valid(client):
     response = client.post('/showSummary', data={'email': 'pipo@mail.com'}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Email not found' in response.data
+
+
+def test_logout(client):
+    response = client.get('/logout', follow_redirects=True)
+    assert response.status_code == 200
+    assert b'Logout' in response.data
+
+    # # On verifie ensuite que l'accès est refusé - ou redir 302 (dans le cas de gestion de session)
+    # response = client.get('/showSummary', follow_redirects=True)
+    # assert response.status_code == 403 or response.status_code == 302
