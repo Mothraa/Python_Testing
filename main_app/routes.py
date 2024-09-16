@@ -1,9 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for, g
+from flask import Blueprint, session, render_template, request, redirect, flash, url_for, g
 
 bp = Blueprint('main', __name__)
 
 # TODO : regarder url_for qui est chargé pour le logout => a priori pour pointer sur un path lors de redirection
-# TODO : authentification au lieu d'une simple identification, CSRF token, Flask-Login pour les permissions,...
+# TODO : authentification au lieu d'une simple identification, session flask, CSRF token, Flask-Login pour les permissions,...
 # autres aspects sécurité ?
 
 
@@ -55,4 +55,5 @@ def purchasePlaces():
 
 @bp.route('/logout')
 def logout():
+    flash("Logout!")
     return redirect(url_for('main.index'))
