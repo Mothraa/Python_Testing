@@ -18,11 +18,10 @@ def showSummary():
 
     if len(club_by_email_list) == 0:
         flash("Email not found")
-        print("DEBUG")
         return redirect(url_for('main.index'))
 
     if len(club_by_email_list) > 1:
-        flash("Email found for {len(clubs_by_email)} clubs. Please contact administrator.")
+        flash(f"Email found for {len(club_by_email_list)} clubs. Please contact administrator.")
         return redirect(url_for('main.index'))
 
     # cas nominal d'un seul club trouvé pour une adresse
