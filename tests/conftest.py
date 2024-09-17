@@ -96,7 +96,6 @@ def mock_json_with_wrong_key(monkeypatch):
     monkeypatch.setattr('builtins.open', mock_open(read_data=json_data))
 
 
-# TODO : a déplacer dans test_services ?
 @pytest.fixture
 def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
     """ Fixture to simulate services.JSONLoaderService"""
