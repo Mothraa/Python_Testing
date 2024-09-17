@@ -63,7 +63,7 @@ def mock_competitions():
             "name": "Fall Classic",
             "date": "2020-10-22 13:30:00",
             "numberOfPlaces": 13
-        }
+        },
         {
             "name": "Fall Classic 2025",
             "date": "2025-10-22 13:30:00",
