@@ -1,5 +1,5 @@
 # memo : pas besoin d'importer les fixtures présentes dans conftest, pytest s'en charge !
-# TODO : validation format email : (email-validator ou pyIsEmail ou par regex) en complément de la verif de base du template
+# TODO : validation email : (email-validator ou pyIsEmail ou par regex) en complément de la verif de base du template
 
 
 def test_index_status_code(client):
@@ -36,7 +36,3 @@ def test_logout(client):
     response = client.get('/logout', follow_redirects=True)
     assert response.status_code == 200
     assert b'Logout' in response.data
-
-    # # On verifie ensuite que l'accès est refusé - ou redir 302 (dans le cas de gestion de session)
-    # response = client.get('/showSummary', follow_redirects=True)
-    # assert response.status_code == 403 or response.status_code == 302
