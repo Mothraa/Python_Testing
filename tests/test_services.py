@@ -3,9 +3,9 @@ import pytest
 from main_app.services import JSONLoaderService, BookingService
 
 
-@pytest.fixture
-def booking_service():
-    return BookingService(mock_clubs, mock_competitions)  # mocks defined in conftest.py
+# @pytest.fixture
+# def booking_service(mock_clubs, mock_competitions):
+#     return BookingService(clubs=mock_clubs, competitions=mock_competitions)  # mocks defined in conftest.py
 
 
 def test_load_clubs(app, json_loader, mock_clubs):
@@ -79,28 +79,28 @@ def test_competitions_places_are_integers(app):
 
 
 def test_get_club_by_name(app, mock_clubs):
-    service = BookingService(mock_clubs, [])
-    result = service.get_club_by_name("Iron Temple")
+    booking_service = BookingService(mock_clubs, [])
+    result = booking_service.get_club_by_name("Iron Temple")
     assert result == {"name": "Iron Temple", "email": "admin@irontemple.com", "points": 4}
 
-    result = service.get_club_by_name("Fake Club")
+    result = booking_service.get_club_by_name("Fake Club")
     assert result is None
 
 
 def test_get_competition_by_name(app, mock_competitions):
-    service = BookingService([], mock_competitions)
-    result = service.get_competition_by_name("Fall Classic")
+    booking_service = BookingService([], mock_competitions)
+    result = booking_service.get_competition_by_name("Fall Classic")
     assert result == {"name": "Fall Classic", "date": "2020-10-22 13:30:00", "numberOfPlaces": 13}
 
-    result = service.get_competition_by_name("Fake Competition")
+    result = booking_service.get_competition_by_name("Fake Competition")
     assert result is None
 
 
 def test_has_enough_places(app, mock_competitions):
-    service = BookingService([], mock_competitions)
-    competition = service.get_competition_by_name("Spring Festival")  # 25 places
-    assert service.has_enough_places(competition, 25) is True
-    assert service.has_enough_places(competition, 26) is False
+    booking_service = BookingService([], mock_competitions)
+    competition = booking_service.get_competition_by_name("Spring Festival")  # 25 places
+    assert booking_service.has_enough_places(competition, 25) is True
+    assert booking_service.has_enough_places(competition, 26) is False
 
 
 def test_with_max_places_under_limit(app):
@@ -115,3 +115,15 @@ def test_with_max_places_exceed_limit(app):
     booking_service = BookingService([], [])
     # Dans le cas ou MAX_PLACES is 12
     assert booking_service.is_ok_with_max_places_limit(13) is False
+
+
+def test_is_competition_in_future(app, mock_clubs, mock_competitions):
+    booking_service = BookingService(mock_clubs, mock_competitions)
+    future_competition = mock_competitions[2]  # Fall Classic 2025 (in future)
+    assert booking_service.is_competition_in_futur(future_competition) is True
+
+
+def test_is_competition_in_past(app, mock_clubs, mock_competitions):
+    booking_service = BookingService(mock_clubs, mock_competitions)
+    past_competition = mock_competitions[0]  # Spring Festival (in past, 2020)
+    assert booking_service.is_competition_in_futur(past_competition) is False
