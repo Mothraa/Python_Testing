@@ -53,3 +53,12 @@ def test_load_competitions_json_decode_error(app, monkeypatch, mock_open_corrupt
     with app.app_context():
         with pytest.raises(Exception):
             loader.get_competitions()
+
+
+def test_club_points_are_integers(app):
+    loader = JSONLoader()
+    with app.app_context():
+        clubs = loader.get_clubs()
+    for club in clubs:
+        points = club['points']
+        assert isinstance(points, int)
