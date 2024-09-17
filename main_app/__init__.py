@@ -1,7 +1,7 @@
 import os
 from flask import Flask, g
 
-from .services import JSONLoader
+from .services import JSONLoaderService
 from .routes import bp as main_app_bp
 
 
@@ -19,13 +19,13 @@ def create_app(config_filename='config.py'):
     @app.before_request
     def load_data():
         if 'clubs' not in g:
-            data_loader = JSONLoader()
+            data_loader = JSONLoaderService()
             g.clubs = data_loader.get_clubs()
             g.competitions = data_loader.get_competitions()
 
     # with app.app_context():
     #     print(app.url_map)  # for debug
-    #     # data_loader = JSONLoader()
+    #     # data_loader = JSONLoaderService()
     #     # clubs = data_loader.get_clubs()
     #     # competitions = data_loader.get_competitions()
 

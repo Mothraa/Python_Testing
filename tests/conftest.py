@@ -5,7 +5,7 @@ from unittest.mock import mock_open
 import pytest
 
 from main_app import create_app
-from main_app.services import JSONLoader
+from main_app.services import JSONLoaderService
 
 
 @pytest.fixture
@@ -37,16 +37,16 @@ def mock_clubs():
         {
             "name": "Simply Lift",
             "email": "john@simplylift.co",
-            "points": "13"
+            "points": 13
         },
         {
             "name": "Iron Temple",
             "email": "admin@irontemple.com",
-            "points": "4"
+            "points": 4
         },
         {   "name": "She Lifts",
             "email": "kate@shelifts.co.uk",
-            "points": "12"
+            "points": 12
         }
     ]
 
@@ -57,12 +57,12 @@ def mock_competitions():
         {
             "name": "Spring Festival",
             "date": "2020-03-27 10:00:00",
-            "numberOfPlaces": "25"
+            "numberOfPlaces": 25
         },
         {
             "name": "Fall Classic",
             "date": "2020-10-22 13:30:00",
-            "numberOfPlaces": "13"
+            "numberOfPlaces": 13
         }
     ]
 
@@ -94,13 +94,13 @@ def mock_json_with_wrong_key(monkeypatch):
 # TODO : a déplacer dans test_services ?
 @pytest.fixture
 def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
-    """ Fixture to simulate services.JSONLoader"""
+    """ Fixture to simulate services.JSONLoaderService"""
     with app.app_context():
         # Simulation du chemin des fichiers json dans app.config
         app.config['json_clubs_path'] = 'repertory/mock_clubs.json'
         app.config['json_competitions_path'] = 'repertory/mock_competitions.json'
 
-        # for mocking JSONLoader._load_data
+        # for mocking JSONLoaderService._load_data
         def mock_load_data(self, filename, key):
             if key == 'clubs':
                 return mock_clubs
@@ -108,6 +108,6 @@ def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
                 return mock_competitions
             return []
 
-        monkeypatch.setattr(JSONLoader, '_load_data', mock_load_data)
+        monkeypatch.setattr(JSONLoaderService, '_load_data', mock_load_data)
 
-    return JSONLoader()
+    return JSONLoaderService()
