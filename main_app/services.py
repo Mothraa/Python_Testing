@@ -3,7 +3,7 @@ import json
 from flask import current_app
 
 
-class JSONLoader:
+class JSONLoaderService:
     """ Load JSON datas from files of clubs and competitions"""
     clubs_path = None
     competitions_path = None
@@ -32,5 +32,25 @@ class JSONLoader:
             raise Exception(f"Erreur de decodage du fichier {filename}")
 
 
-class JSONSaver:
+class JSONSaverService:
     pass
+
+
+class BookingService:
+    def __init__(self, clubs, competitions):
+        self.clubs = clubs
+        self.competitions = competitions
+
+    def get_club_by_name(self, club_name):
+        # TODO : a tester
+        return next((c for c in self.clubs if c['name'] == club_name), None)
+
+    def get_competition_by_name(self, competition_name):
+        # TODO : a tester
+        return next((c for c in self.competitions if c['name'] == competition_name), None)
+
+    def has_enough_places(self, competition, places_required):
+        return int(competition['numberOfPlaces']) >= places_required
+
+    def update_competition_places(self, competition, places_required):
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
