@@ -1,4 +1,4 @@
-from flask import Blueprint, session, render_template, request, redirect, flash, url_for, g
+from flask import Blueprint, render_template, request, redirect, flash, url_for, g
 
 from .services import BookingService
 
@@ -46,8 +46,6 @@ def book(competition, club):
 @bp.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     booking_service = BookingService(g.clubs, g.competitions)
-    # competition = [c for c in g.competitions if c['name'] == request.form['competition']][0]
-    # club = [c for c in g.clubs if c['name'] == request.form['club']][0]
 
     club = booking_service.get_club_by_name(request.form['club'])
     competition = booking_service.get_competition_by_name(request.form['competition'])
@@ -62,7 +60,6 @@ def purchasePlaces():
     if not booking_service.has_enough_places(competition, places_required):
         flash(f"Not enough places in competition ({competition['numberOfPlaces']}) to book {places_required} places.")
         return render_template('booking.html', club=club, competition=competition)
-
 
     # competition['numberOfPlaces'] = competition['numberOfPlaces'] - placesRequired
 
