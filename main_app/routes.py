@@ -57,7 +57,7 @@ def purchasePlaces():
         return render_template('welcome.html', club=club, competitions=g.competitions)
 
     # On vérifie si la compétition est dans le futur ou déjà passée.
-    if not booking_service.is_competition_in_futur(competition):
+    if not booking_service.is_competition_in_future(competition):
         flash("Competition already past")
         return render_template('welcome.html', club=club, competitions=g.competitions)
 

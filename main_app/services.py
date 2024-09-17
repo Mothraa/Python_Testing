@@ -58,6 +58,6 @@ class BookingService:
     def update_competition_places(self, competition, places_required):
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
 
-    def is_competition_in_futur(self, competition):
+    def is_competition_in_future(self, competition):
         competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
         return competition_date > datetime.now()
