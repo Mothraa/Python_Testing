@@ -3,6 +3,11 @@ import pytest
 from main_app.services import JSONLoaderService, BookingService
 
 
+@pytest.fixture
+def booking_service():
+    return BookingService(mock_clubs, mock_competitions)  # mocks defined in conftest.py
+
+
 def test_load_clubs(app, json_loader, mock_clubs):
     with app.app_context():
         clubs = json_loader.get_clubs()
@@ -73,7 +78,7 @@ def test_competitions_places_are_integers(app):
         assert isinstance(places, int)
 
 
-def test_get_club_by_name(mock_clubs):
+def test_get_club_by_name(app, mock_clubs):
     service = BookingService(mock_clubs, [])
     result = service.get_club_by_name("Iron Temple")
     assert result == {"name": "Iron Temple", "email": "admin@irontemple.com", "points": 4}
@@ -82,7 +87,7 @@ def test_get_club_by_name(mock_clubs):
     assert result is None
 
 
-def test_get_competition_by_name(mock_competitions):
+def test_get_competition_by_name(app, mock_competitions):
     service = BookingService([], mock_competitions)
     result = service.get_competition_by_name("Fall Classic")
     assert result == {"name": "Fall Classic", "date": "2020-10-22 13:30:00", "numberOfPlaces": 13}
@@ -91,8 +96,22 @@ def test_get_competition_by_name(mock_competitions):
     assert result is None
 
 
-def test_has_enough_places(mock_competitions):
+def test_has_enough_places(app, mock_competitions):
     service = BookingService([], mock_competitions)
     competition = service.get_competition_by_name("Spring Festival")  # 25 places
     assert service.has_enough_places(competition, 25) is True
     assert service.has_enough_places(competition, 26) is False
+
+
+def test_with_max_places_under_limit(app):
+    # instanciation sans données juste pour appeler la methode
+    booking_service = BookingService([], [])
+    # Dans le cas ou MAX_PLACES is 12
+    assert booking_service.is_ok_with_max_places_limit(11) is True
+
+
+def test_with_max_places_exceed_limit(app):
+    # instanciation sans données juste pour appeler la methode
+    booking_service = BookingService([], [])
+    # Dans le cas ou MAX_PLACES is 12
+    assert booking_service.is_ok_with_max_places_limit(13) is False

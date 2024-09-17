@@ -40,17 +40,19 @@ class BookingService:
     def __init__(self, clubs, competitions):
         self.clubs = clubs
         self.competitions = competitions
+        self.max_places = current_app.config.get('MAX_PLACES')
 
     def get_club_by_name(self, club_name):
-        # TODO : a tester
         return next((c for c in self.clubs if c['name'] == club_name), None)
 
     def get_competition_by_name(self, competition_name):
-        # TODO : a tester
         return next((c for c in self.competitions if c['name'] == competition_name), None)
 
     def has_enough_places(self, competition, places_required):
         return int(competition['numberOfPlaces']) >= places_required
+
+    def is_ok_with_max_places_limit(self, places_required):
+        return places_required <= self.max_places
 
     def update_competition_places(self, competition, places_required):
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required

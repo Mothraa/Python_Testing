@@ -56,9 +56,15 @@ def purchasePlaces():
         flash('Invalid number of places')
         return render_template('welcome.html', club=club, competitions=g.competitions)
 
+    # On vérifie que le nombre de places demandées est inférieur a la limite authorisée par clubs
+    if not booking_service.is_ok_with_max_places_limit(places_required):
+        flash(f"Not allowed to book {places_required} places.\
+                You exceed the limit by competitions ({booking_service.max_places} places).")
+        return render_template('booking.html', club=club, competition=competition)
+
     # On vérifie que la competition a suffisamment de places
     if not booking_service.has_enough_places(competition, places_required):
-        flash(f"Not enough places in competition ({competition['numberOfPlaces']}) to book {places_required} places.")
+        flash(f"Not enough places in competition ({competition['numberOfPlaces']}) to book {places_required} places")
         return render_template('booking.html', club=club, competition=competition)
 
     # competition['numberOfPlaces'] = competition['numberOfPlaces'] - placesRequired
