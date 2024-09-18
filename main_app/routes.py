@@ -17,9 +17,8 @@ def index():
 @bp.route('/showSummary', methods=['POST'])
 def showSummary():
     club_by_email_list = [club for club in g.clubs if club['email'] == request.form['email']]
-    # TODO : interdire la reservation de places pour des compétitions qui ont déjà eu lieu
 
-    if len(club_by_email_list) == 0:
+    if not club_by_email_list:
         flash("Email not found")
         return redirect(url_for('main.index'))
 
@@ -27,7 +26,6 @@ def showSummary():
         flash(f"Email found for {len(club_by_email_list)} clubs. Please contact administrator.")
         return redirect(url_for('main.index'))
 
-    
     # cas nominal d'un seul club trouvé pour une adresse
     club = club_by_email_list[0]
 
@@ -40,7 +38,6 @@ def showSummary():
         competitions_with_future_status.append(competition_with_status)
 
     return render_template('welcome.html', club=club, competitions=competitions_with_future_status)
-    # return render_template('welcome.html', club=club, competitions=g.competitions)
 
 
 @bp.route('/book/<competition>/<club>')
@@ -72,7 +69,7 @@ def purchasePlaces():
         flash("Competition already past")
         return render_template('welcome.html', club=club, competitions=g.competitions)
 
-    # On vérifie que le nombre de places demandées est inférieur a la limite authorisée par clubs
+    # On vérifie que le nombre de places demandées est inférieur a la limite authorisée par clubs ()
     if not booking_service.is_ok_with_max_places_limit(places_required):
         flash(f"Not allowed to book {places_required} places.\
                 You exceed the limit by competitions ({booking_service.max_places} places).")
@@ -83,9 +80,16 @@ def purchasePlaces():
         flash(f"Not enough places in competition ({competition['numberOfPlaces']}) to book {places_required} places")
         return render_template('booking.html', club=club, competition=competition)
 
+    # On vérifie que le club à suffisamment de places (points) par rapport a sa demande
+    if not booking_service.has_enough_points(club, places_required):
+        flash("Not enough points to book competition places")
+        return render_template('booking.html', club=club, competition=competition)
+
     # competition['numberOfPlaces'] = competition['numberOfPlaces'] - placesRequired
 
     # TODO update JSON file
+    # TODO : pb de sauvegarde asynchrone\
+    # (erreur dans un des fichiers json => corruption des données ; sauvegarde concomitante,...)
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=g.competitions)
 

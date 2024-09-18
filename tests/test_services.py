@@ -129,6 +129,17 @@ def test_has_enough_places(app, mock_competitions):
     assert booking_service.has_enough_places(competition, 26) is False
 
 
+def test_has_enough_points(app, mock_clubs):
+    booking_service = BookingService(mock_clubs, [])
+    # 'Iron Temple' => 4 points
+    club = booking_service.get_club_by_name('Iron Temple')
+    result = booking_service.has_enough_points(club, 3)
+    assert result is True
+    club = booking_service.get_club_by_name('Iron Temple')
+    result = booking_service.has_enough_points(club, 5)
+    assert result is False
+
+
 def test_with_max_places_under_limit(app):
     # instanciation sans données juste pour appeler la methode
     booking_service = BookingService([], [])

@@ -31,7 +31,7 @@ class JSONLoaderService:
         try:
             with open(filename, 'r') as f:
                 data = json.load(f)
-            # on retourne une liste vide si clé non trouvée
+            # on retourne None si clé non trouvée
             return data.get(key, None)
         except FileNotFoundError:
             raise Exception(f"Le fichier {filename} est introuvable")
@@ -57,9 +57,52 @@ class BookingService:
     def is_ok_with_max_places_limit(self, places_required):
         return places_required <= self.max_places
 
+    def has_enough_points(self, club, places_required):
+        return club['points'] >= places_required
+
     def update_competition_places(self, competition, places_required):
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
 
     def is_competition_in_future(self, competition):
         competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
         return competition_date > datetime.now()
+
+
+class JSONSaverService:
+    def __init__(self, clubs_path, competitions_path, bookings_path):
+        self.clubs_path = clubs_path
+        self.competitions_path = competitions_path
+        self.bookings_path = bookings_path
+
+    def save_clubs(self, clubs):
+        """Save clubs"""
+        self._save_data(self.clubs_path, 'clubs', clubs)
+
+    def save_competitions(self, competitions):
+        """Save competitions"""
+        self._save_data(self.competitions_path, 'competitions', competitions)
+
+    def save_bookings(self, bookings):
+        """Save bookings"""
+        self._save_data(self.bookings_path, 'bookings', bookings)
+
+    def _load_data(self, filename):
+        try:
+            with open(filename, 'r') as f:
+                return json.load(f)
+        # except FileNotFoundError:
+        # Si le fichier n'existe pas, commencer avec une structure vide sous la clé "bookings"
+        #     return {"bookings": {}}
+        except json.JSONDecodeError:
+            raise Exception(f"Erreur de decodage de {filename}")
+
+    def _save_data(self, filename, key, data):
+        try:
+            # chargement des données existantes avant sauvegarde
+            existing_data = self._load_data(filename)
+            existing_data[key] = data
+
+            with open(filename, 'w') as f:
+                json.dump(existing_data, f, indent=4)
+        except IOError as e:
+            raise Exception(f"Erreur de sauvegarde de {filename}: {e}")
