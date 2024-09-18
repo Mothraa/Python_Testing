@@ -19,6 +19,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # JSON
 JSON_CLUBS_PATH = os.path.join(basedir, 'clubs.json')
 JSON_COMPETITIONS_PATH = os.path.join(basedir, 'competitions.json')
+JSON_BOOKINGS_PATH = os.path.join(basedir, 'bookings.json')
 
 # maximum places allowed to reserve by competition per club
 MAX_PLACES = 12
