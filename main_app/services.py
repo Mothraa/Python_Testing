@@ -8,10 +8,12 @@ class JSONLoaderService:
     """ Load JSON datas from files of clubs and competitions"""
     clubs_path = None
     competitions_path = None
+    bookings_path = None
 
     def __init__(self):
         self.clubs_path = current_app.config['JSON_CLUBS_PATH']
         self.competitions_path = current_app.config['JSON_COMPETITIONS_PATH']
+        self.bookings_path = current_app.config['JSON_BOOKINGS_PATH']
 
     def get_clubs(self):
         """Load clubs' list"""
@@ -21,20 +23,20 @@ class JSONLoaderService:
         """Load competitions' list"""
         return self._load_data(self.competitions_path, 'competitions')
 
+    def get_bookings(self):
+        """Load bookings' dict"""
+        return self._load_data(self.bookings_path, 'bookings')
+
     def _load_data(self, filename, key):
         try:
             with open(filename, 'r') as f:
                 data = json.load(f)
             # on retourne une liste vide si clé non trouvée
-            return data.get(key, [])
+            return data.get(key, None)
         except FileNotFoundError:
             raise Exception(f"Le fichier {filename} est introuvable")
         except json.JSONDecodeError:
-            raise Exception(f"Erreur de decodage du fichier {filename}")
-
-
-class JSONSaverService:
-    pass
+            raise Exception(f"Erreur de decodage de {filename}")
 
 
 class BookingService:

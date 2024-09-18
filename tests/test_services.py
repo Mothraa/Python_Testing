@@ -20,18 +20,31 @@ def test_load_competitions(app, json_loader, mock_competitions):
     assert competitions == mock_competitions
 
 
+def test_load_bookings(app, json_loader, mock_bookings):
+    with app.app_context():
+        bookings = json_loader.get_bookings()
+    assert bookings == mock_bookings
+
+
 def test_load_clubs_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
     loader = JSONLoaderService()
-    monkeypatch.setattr(loader, '_load_data', lambda filename, key: [])
+    monkeypatch.setattr(loader, '_load_data', lambda filename, key: None)
     clubs = loader.get_clubs()
-    assert clubs == []
+    assert clubs is None
 
 
 def test_load_competitions_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
     loader = JSONLoaderService()
-    monkeypatch.setattr(loader, '_load_data', lambda filename, key: [])
+    monkeypatch.setattr(loader, '_load_data', lambda filename, key: None)
     competitions = loader.get_competitions()
-    assert competitions == []
+    assert competitions is None
+
+
+def test_load_bookings_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
+    loader = JSONLoaderService()
+    monkeypatch.setattr(loader, '_load_data', lambda filename, key: None)
+    bookings = loader.get_bookings()
+    assert bookings is None
 
 
 def test_load_clubs_file_not_found(app, monkeypatch, mock_open_missing_file):
@@ -46,6 +59,12 @@ def test_load_competitions_file_not_found(app, monkeypatch, mock_open_missing_fi
         loader.get_competitions()
 
 
+def test_load_bookings_file_not_found(app, monkeypatch, mock_open_missing_file):
+    loader = JSONLoaderService()
+    with pytest.raises(Exception):
+        loader.get_bookings()
+
+
 def test_load_clubs_json_decode_error(app, monkeypatch, mock_open_corrupted_file):
     loader = JSONLoaderService()
     with app.app_context():
@@ -58,6 +77,13 @@ def test_load_competitions_json_decode_error(app, monkeypatch, mock_open_corrupt
     with app.app_context():
         with pytest.raises(Exception):
             loader.get_competitions()
+
+
+def test_load_bookings_json_decode_error(app, monkeypatch, mock_open_corrupted_file):
+    loader = JSONLoaderService()
+    with app.app_context():
+        with pytest.raises(Exception):
+            loader.get_bookings()
 
 
 def test_club_points_are_integers(app):

@@ -73,6 +73,25 @@ def mock_competitions():
 
 
 @pytest.fixture
+def mock_bookings():
+    return {
+            "competition_a": {
+                "club1": 5,
+                "club2": 3
+            },
+            "competition_b": {
+                "club1": 1,
+                "club3": 2,
+                "club4": 8
+            },
+            "competition_c": {
+                "club1": 6,
+                "club2": 4
+            }
+            }
+
+
+@pytest.fixture
 def mock_open_missing_file(monkeypatch):
 
     def mock_open(*args, **kwargs):
@@ -97,12 +116,14 @@ def mock_json_with_wrong_key(monkeypatch):
 
 
 @pytest.fixture
-def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
+def json_loader(app, monkeypatch, mock_clubs, mock_competitions, mock_bookings):
     """ Fixture to simulate services.JSONLoaderService"""
     with app.app_context():
         # Simulation du chemin des fichiers json dans app.config
         app.config['json_clubs_path'] = 'repertory/mock_clubs.json'
         app.config['json_competitions_path'] = 'repertory/mock_competitions.json'
+        app.config['json_booking_path'] = 'repertory/mock_booking.json'
+
 
         # for mocking JSONLoaderService._load_data
         def mock_load_data(self, filename, key):
@@ -110,6 +131,8 @@ def json_loader(app, monkeypatch, mock_clubs, mock_competitions):
                 return mock_clubs
             elif key == 'competitions':
                 return mock_competitions
+            elif key == 'bookings':
+                return mock_bookings
             return []
 
         monkeypatch.setattr(JSONLoaderService, '_load_data', mock_load_data)
