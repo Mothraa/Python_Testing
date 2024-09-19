@@ -90,9 +90,6 @@ class JSONSaverService:
         try:
             with open(filename, 'r') as f:
                 return json.load(f)
-        # except FileNotFoundError:
-        # Si le fichier n'existe pas, commencer avec une structure vide sous la clé "bookings"
-        #     return {"bookings": {}}
         except json.JSONDecodeError:
             raise Exception(f"Erreur de decodage de {filename}")
 

@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for, g
+from flask import Blueprint, render_template, request, redirect, flash, url_for, g, current_app
 
-from .services import BookingService
+from .services import BookingService, JSONSaverService
 
 bp = Blueprint('main', __name__)
 
@@ -54,6 +54,9 @@ def book(competition, club):
 @bp.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     booking_service = BookingService(g.clubs, g.competitions)
+    save_service = JSONSaverService(current_app.config['json_clubs_path'],
+                                    current_app.config['json_competitions_path'],
+                                    current_app.config['json_booking_path'])
 
     club = booking_service.get_club_by_name(request.form['club'])
     competition = booking_service.get_competition_by_name(request.form['competition'])
@@ -89,6 +92,10 @@ def purchasePlaces():
     competition['numberOfPlaces'] -= places_required
     club['points'] -= places_required
 
+    # sauvegarde des fichiers json
+    save_service.save_clubs(g.clubs)
+    save_service.save_competitions(g.competitions)
+    #save_service.save_booking()
 
     # TODO update JSON file
     # TODO : pb de sauvegarde asynchrone\
