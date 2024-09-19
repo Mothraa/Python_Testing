@@ -86,6 +86,12 @@ class JSONSaverService:
         data['competitions'] = competitions  # maj des données
         self._save_data(self.competitions_path, 'competitions', data)  # sauvegarde du fichier
 
+    def save_bookings(self, bookings):
+        """Save bookings"""
+        data = self._load_data(self.bookings_path)  # on récupère les données existantes
+        data['bookings'] = bookings
+        self._save_data(self.bookings_path, 'bookings', data)
+
     def _load_data(self, filename):
         try:
             with open(filename, 'r') as f:
