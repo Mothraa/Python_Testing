@@ -64,12 +64,12 @@ def purchasePlaces():
         flash('Invalid number of places')
         return render_template('welcome.html', club=club, competitions=g.competitions)
 
-    # On vérifie si la compétition est dans le futur ou déjà passée.
+    # On vérifie si la compétition est dans le futur ou déjà passée
     if not booking_service.is_competition_in_future(competition):
         flash("Competition already past")
         return render_template('welcome.html', club=club, competitions=g.competitions)
 
-    # On vérifie que le nombre de places demandées est inférieur a la limite authorisée par clubs ()
+    # On vérifie que le nombre de places demandées est inférieur a la limite authorisée par clubs
     if not booking_service.is_ok_with_max_places_limit(places_required):
         flash(f"Not allowed to book {places_required} places.\
                 You exceed the limit by competitions ({booking_service.max_places} places).")
@@ -85,7 +85,10 @@ def purchasePlaces():
         flash("Not enough points to book competition places")
         return render_template('booking.html', club=club, competition=competition)
 
-    # competition['numberOfPlaces'] = competition['numberOfPlaces'] - placesRequired
+    # On met à jour les places et les points
+    competition['numberOfPlaces'] -= places_required
+    club['points'] -= places_required
+
 
     # TODO update JSON file
     # TODO : pb de sauvegarde asynchrone\
