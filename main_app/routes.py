@@ -54,9 +54,9 @@ def book(competition, club):
 @bp.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     booking_service = BookingService(g.clubs, g.competitions)
-    save_service = JSONSaverService(current_app.config['json_clubs_path'],
-                                    current_app.config['json_competitions_path'],
-                                    current_app.config['json_booking_path'])
+    save_service = JSONSaverService(current_app.config['JSON_CLUBS_PATH'],
+                                    current_app.config['JSON_COMPETITIONS_PATH'],
+                                    current_app.config['JSON_BOOKINGS_PATH'])
 
     club = booking_service.get_club_by_name(request.form['club'])
     competition = booking_service.get_competition_by_name(request.form['competition'])
@@ -95,7 +95,7 @@ def purchasePlaces():
     # sauvegarde des fichiers json
     save_service.save_clubs(g.clubs)
     save_service.save_competitions(g.competitions)
-    #save_service.save_booking()
+    # save_service.save_booking()
 
     # TODO update JSON file
     # TODO : pb de sauvegarde asynchrone\
