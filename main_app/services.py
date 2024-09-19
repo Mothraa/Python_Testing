@@ -76,30 +76,28 @@ class JSONSaverService:
 
     def save_clubs(self, clubs):
         """Save clubs"""
-        self._save_data(self.clubs_path, 'clubs', clubs)
+        data = self._load_data(self.clubs_path)  # on récupère les données existantes
+        data['clubs'] = clubs  # maj du dict data avec les données de clubs
+        self._save_data(self.clubs_path, 'clubs', data)  # sauvegarde du fichier
 
     def save_competitions(self, competitions):
         """Save competitions"""
-        self._save_data(self.competitions_path, 'competitions', competitions)
-
-    def save_bookings(self, bookings):
-        """Save bookings"""
-        self._save_data(self.bookings_path, 'bookings', bookings)
+        data = self._load_data(self.competitions_path)  # on récupère les données existantes
+        data['competitions'] = competitions  # maj des données
+        self._save_data(self.competitions_path, 'competitions', data)  # sauvegarde du fichier
 
     def _load_data(self, filename):
         try:
             with open(filename, 'r') as f:
                 return json.load(f)
+        # TODO : autres exceptions ?
         except json.JSONDecodeError:
             raise Exception(f"Erreur de decodage de {filename}")
 
     def _save_data(self, filename, key, data):
         try:
-            # chargement des données existantes avant sauvegarde
-            existing_data = self._load_data(filename)
-            existing_data[key] = data
-
             with open(filename, 'w') as f:
-                json.dump(existing_data, f, indent=4)
+                json.dump({key: data}, f, indent=4)
+        # TODO : autres exceptions ?
         except IOError as e:
             raise Exception(f"Erreur de sauvegarde de {filename}: {e}")
