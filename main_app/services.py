@@ -76,21 +76,18 @@ class JSONSaverService:
 
     def save_clubs(self, clubs):
         """Save clubs"""
-        data = self._load_data(self.clubs_path)  # on récupère les données existantes
-        data['clubs'] = clubs  # maj du dict data avec les données de clubs
-        self._save_data(self.clubs_path, 'clubs', data)  # sauvegarde du fichier
+        updated_data = self._update_data(self.clubs_path, 'clubs', clubs)
+        self._save_data(self.clubs_path, updated_data)
 
     def save_competitions(self, competitions):
         """Save competitions"""
-        data = self._load_data(self.competitions_path)  # on récupère les données existantes
-        data['competitions'] = competitions  # maj des données
-        self._save_data(self.competitions_path, 'competitions', data)  # sauvegarde du fichier
+        updated_data = self._update_data(self.competitions_path, 'competitions', competitions)
+        self._save_data(self.competitions_path, updated_data)
 
     def save_bookings(self, bookings):
         """Save bookings"""
-        data = self._load_data(self.bookings_path)  # on récupère les données existantes
-        data['bookings'] = bookings
-        self._save_data(self.bookings_path, 'bookings', data)
+        updated_data = self._update_data(self.bookings_path, 'bookings', bookings)
+        self._save_data(self.bookings_path, updated_data)
 
     def _load_data(self, filename):
         try:
@@ -100,10 +97,16 @@ class JSONSaverService:
         except json.JSONDecodeError:
             raise Exception(f"Erreur de decodage de {filename}")
 
-    def _save_data(self, filename, key, data):
+    def _save_data(self, filename, data):
         try:
             with open(filename, 'w') as f:
-                json.dump({key: data}, f, indent=4)
+                json.dump(data, f, indent=4)
         # TODO : autres exceptions ?
         except IOError as e:
             raise Exception(f"Erreur de sauvegarde de {filename}: {e}")
+
+    def _update_data(self, filename, key, new_data):
+        """ load existing data and return updated datas"""
+        existing_data = self._load_data(filename)
+        existing_data[key] = new_data
+        return existing_data
