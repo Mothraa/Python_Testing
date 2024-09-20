@@ -29,15 +29,7 @@ def showSummary():
     # cas nominal d'un seul club trouvé pour une adresse
     club = club_by_email_list[0]
 
-    # ajout du statut "is_competition_in_future" pour chaque compétition.
-    booking_service = BookingService(g.clubs, g.competitions)
-    competitions_with_future_status = []
-    for comp in g.competitions:
-        competition_with_status = dict(comp)
-        competition_with_status['is_competition_in_future'] = booking_service.is_competition_in_future(comp)
-        competitions_with_future_status.append(competition_with_status)
-
-    return render_template('welcome.html', club=club, competitions=competitions_with_future_status)
+    return render_template('welcome.html', club=club, competitions=g.competitions)
 
 
 @bp.route('/book/<competition>/<club>')
@@ -92,6 +84,8 @@ def purchasePlaces():
     competition['numberOfPlaces'] -= places_required
     club['points'] -= places_required
 
+    print(competition)
+    print(g.competitions)
     # sauvegarde des fichiers json
     save_service.save_clubs(g.clubs)
     save_service.save_competitions(g.competitions)
@@ -101,7 +95,8 @@ def purchasePlaces():
     # TODO : pb de sauvegarde asynchrone\
     # (erreur dans un des fichiers json => corruption des données ; sauvegarde concomitante,...)
     flash('Great-booking complete!')
-    return render_template('welcome.html', club=club, competitions=g.competitions)
+    return redirect(url_for('main.showSummary'))
+    # return render_template('welcome.html', club=club, competitions=g.competitions)
 
 
 # TODO: Add route for points display

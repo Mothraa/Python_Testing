@@ -1,7 +1,7 @@
 import os
 from flask import Flask, g
 
-from .services import JSONLoaderService
+from .services import JSONLoaderService, BookingService
 from .routes import bp as main_app_bp
 
 
@@ -18,10 +18,17 @@ def create_app(config_filename='config.py'):
 
     @app.before_request
     def load_data():
+        # si les données n'ont pas encore été chargées
         if 'clubs' not in g:
             data_loader = JSONLoaderService()
             g.clubs = data_loader.get_clubs()
             g.competitions = data_loader.get_competitions()
+            # g.bookings = data_loader.get_bookings()
+
+            # on ajoute le statut (bool) pour savoir\
+            #  si la compétition a déjà eu lieu (false) ou est dans le futur (true)
+            booking_service = BookingService(g.clubs, g.competitions)
+            g.competitions = booking_service.add_future_status_to_competitions()
 
     # with app.app_context():
     #     print(app.url_map)  # for debug

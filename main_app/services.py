@@ -67,6 +67,14 @@ class BookingService:
         competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
         return competition_date > datetime.now()
 
+    def add_future_status_to_competitions(self):
+        competitions_with_future_status = []
+        for competition in self.competitions:
+            competition_with_status = dict(competition)
+            competition_with_status['is_competition_in_future'] = self.is_competition_in_future(competition)
+            competitions_with_future_status.append(competition_with_status)
+        return competitions_with_future_status
+
 
 class JSONSaverService:
     def __init__(self, clubs_path, competitions_path, bookings_path):
