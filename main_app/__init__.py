@@ -20,20 +20,13 @@ def create_app(config_filename='config.py'):
     def load_data():
         # si les données n'ont pas encore été chargées
         if 'clubs' not in g:
-            data_loader = JSONLoaderService()
-            g.clubs = data_loader.get_clubs()
-            g.competitions = data_loader.get_competitions()
-            # g.bookings = data_loader.get_bookings()
+            load_service = JSONLoaderService()
+            g.clubs = load_service.get_clubs()
+            g.competitions = load_service.get_competitions()
 
             # on ajoute le statut (bool) pour savoir\
-            #  si la compétition a déjà eu lieu (false) ou est dans le futur (true)
+            # si la compétition a déjà eu lieu (false) ou est dans le futur (true)
             booking_service = BookingService(g.clubs, g.competitions)
             g.competitions = booking_service.add_future_status_to_competitions()
-
-    # with app.app_context():
-    #     print(app.url_map)  # for debug
-    #     # data_loader = JSONLoaderService()
-    #     # clubs = data_loader.get_clubs()
-    #     # competitions = data_loader.get_competitions()
 
     return app
