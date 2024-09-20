@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, request, redirect, flash, url_for, g, current_app
+from flask import Blueprint, render_template, request, redirect, flash, url_for, g
 
-from .services import BookingService, JSONSaverService
+from .services import BookingService, JSONSaverService, JSONLoaderService
 
 bp = Blueprint('main', __name__)
 
@@ -47,15 +47,17 @@ def book(competition, club):
 @bp.route('/purchasePlaces', methods=['POST'])
 def purchasePlaces():
     booking_service = BookingService(g.clubs, g.competitions)
-    save_service = JSONSaverService(current_app.config['JSON_CLUBS_PATH'],
-                                    current_app.config['JSON_COMPETITIONS_PATH'],
-                                    current_app.config['JSON_BOOKINGS_PATH'])
+    save_service = JSONSaverService()
+    load_service = JSONLoaderService()
 
     club = booking_service.get_club_by_name(request.form['club'])
     competition = booking_service.get_competition_by_name(request.form['competition'])
 
+    # On vérifie que le nombre de place demandé est un nombre entier positif
     try:
         places_required = int(request.form.get('places', ''))
+        if places_required <= 0:
+            raise ValueError("Invalid number of places")
     except ValueError:
         flash('Invalid number of places')
         return render_template('welcome.html', club=club, competitions=g.competitions)
@@ -65,8 +67,13 @@ def purchasePlaces():
         flash("Competition already past")
         return render_template('welcome.html', club=club, competitions=g.competitions)
 
-    # On vérifie que le nombre de places demandées est inférieur a la limite authorisée par clubs
-    if not booking_service.is_ok_with_max_places_limit(places_required):
+    # On récupère les places que le club a déjà réservé pour cette compétition
+    bookings = load_service.get_bookings()
+    already_reserved_places = booking_service.get_reserved_places(bookings, club, competition)
+
+    # On vérifie que le nombre de places demandées est inférieur a la limite authorisée par clubs\
+    # cela correspond aux placées souhaitées + celles précédemment reservées.
+    if not booking_service.is_ok_with_max_places_limit(places_required + already_reserved_places):
         flash(f"Not allowed to book {places_required} places.\
                 You exceed the limit by competitions ({booking_service.max_places} places).")
         return render_template('booking.html', club=club, competition=competition)
@@ -85,16 +92,20 @@ def purchasePlaces():
     competition['numberOfPlaces'] -= places_required
     club['points'] -= places_required
 
-    print(competition)
-    print(g.competitions)
-    # sauvegarde des fichiers json
-    save_service.save_clubs(g.clubs)
-    save_service.save_competitions(g.competitions)
-    # save_service.save_booking()
+    # gestion des reservations (formatage des données avant sauvegarde)
+    updated_bookings = booking_service.handle_bookings(club,
+                                                       competition,
+                                                       places_required,
+                                                       bookings
+                                                       )
 
-    # TODO update JSON file
+    # sauvegarde des fichiers json
     # TODO : pb de sauvegarde asynchrone\
     # (erreur dans un des fichiers json => corruption des données ; sauvegarde concomitante,...)
+    save_service.save_clubs(g.clubs)
+    save_service.save_competitions(g.competitions)
+    save_service.save_bookings(updated_bookings)
+
     flash('Great-booking complete!')
     # return redirect(url_for('main.showSummary'))
     return render_template('welcome.html', club=club, competitions=g.competitions)

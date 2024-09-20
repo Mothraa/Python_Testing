@@ -16,15 +16,15 @@ class JSONLoaderService:
         self.bookings_path = current_app.config['JSON_BOOKINGS_PATH']
 
     def get_clubs(self):
-        """Load clubs' list"""
+        """Load clubs"""
         return self._load_data(self.clubs_path, 'clubs')
 
     def get_competitions(self):
-        """Load competitions' list"""
+        """Load competitions"""
         return self._load_data(self.competitions_path, 'competitions')
 
     def get_bookings(self):
-        """Load bookings' dict"""
+        """Load bookings"""
         return self._load_data(self.bookings_path, 'bookings')
 
     def _load_data(self, filename, key):
@@ -44,12 +44,21 @@ class BookingService:
         self.clubs = clubs
         self.competitions = competitions
         self.max_places = current_app.config.get('MAX_PLACES')
+        # self.data_loader = JSONLoaderService()
 
     def get_club_by_name(self, club_name):
-        return next((c for c in self.clubs if c['name'] == club_name), None)
+        """returns a club from its name"""
+        for club in self.clubs:
+            if club['name'] == club_name:
+                return club
+        return None
 
     def get_competition_by_name(self, competition_name):
-        return next((c for c in self.competitions if c['name'] == competition_name), None)
+        """returns a competition from its name"""
+        for competition in self.competitions:
+            if competition['name'] == competition_name:
+                return competition
+        return None
 
     def has_enough_places(self, competition, places_required):
         return int(competition['numberOfPlaces']) >= places_required
@@ -63,11 +72,13 @@ class BookingService:
     def update_competition_places(self, competition, places_required):
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
 
-    def is_competition_in_future(self, competition):
+    def is_competition_in_future(self, competition) -> bool:
         competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
+        # TODO autoriser pour la date J+1 uniquement (sans heure) ?
         return competition_date > datetime.now()
 
     def add_future_status_to_competitions(self):
+        """add the attribut "competition_wit"""
         competitions_with_future_status = []
         for competition in self.competitions:
             competition_with_status = dict(competition)
@@ -75,12 +86,55 @@ class BookingService:
             competitions_with_future_status.append(competition_with_status)
         return competitions_with_future_status
 
+    def get_reserved_places(self, bookings, club, competition) -> int:
+        """Return number of places reserved by club for the competition"""
+        existing_booking = self._find_existing_booking(bookings, competition)
+        if existing_booking and club['name'] in existing_booking['clubs']:
+            return existing_booking['clubs'][club['name']]
+        return 0  # si pas de réservation trouvée
+
+    def handle_bookings(self, club, competition, places_required, bookings):
+        """Handle bookings..."""
+        existing_booking = self._find_existing_booking(bookings, competition)
+        # si des réservations sont déjà existantes pour cette compétition et ce club
+        if existing_booking:
+            self._update_existing_booking(existing_booking, club, places_required)
+        # si c'est une nouvelle réservation pour la compétition
+        else:
+            self._add_new_booking(bookings, club, competition, places_required)
+
+        return bookings
+
+    def _find_existing_booking(self, bookings, competition):
+        """Trouve une réservation existante pour la compétition donnée"""
+        for booking in bookings:
+            if booking['competition'] == competition['name']:
+                return booking
+        return None
+
+    def _update_existing_booking(self, existing_booking, club, places_required):
+        """Met à jour le nombre de places réservées pour un club existant."""
+        # si le club a déjà pris des places pour le tournoi
+        if club['name'] in existing_booking['clubs']:
+            existing_booking['clubs'][club['name']] += places_required
+        # si le tournoi a déjà des places reservées (par d'autres clubs)\
+        # mais que le club n'a pas encore reservé de place
+        else:
+            existing_booking['clubs'][club['name']] = places_required
+
+    def _add_new_booking(self, bookings, club, competition, places_required):
+        """Add a new book for a club"""
+        bookings.append({
+            'competition': competition['name'],
+            'clubs': {club['name']: places_required}
+        })
+
 
 class JSONSaverService:
-    def __init__(self, clubs_path, competitions_path, bookings_path):
-        self.clubs_path = clubs_path
-        self.competitions_path = competitions_path
-        self.bookings_path = bookings_path
+    def __init__(self):
+        self.clubs_path = current_app.config['JSON_CLUBS_PATH']
+        self.competitions_path = current_app.config['JSON_COMPETITIONS_PATH']
+        self.bookings_path = current_app.config['JSON_BOOKINGS_PATH']
 
     def save_clubs(self, clubs):
         """Save clubs"""
@@ -89,6 +143,7 @@ class JSONSaverService:
 
     def save_competitions(self, competitions):
         """Save competitions"""
+        self._clean_competitions(competitions)
         updated_data = self._update_data(self.competitions_path, 'competitions', competitions)
         self._save_data(self.competitions_path, updated_data)
 
@@ -116,5 +171,11 @@ class JSONSaverService:
     def _update_data(self, filename, key, new_data):
         """ load existing data and return updated datas"""
         existing_data = self._load_data(filename)
+        # print('DEBUG data existante', existing_data)
         existing_data[key] = new_data
         return existing_data
+
+    def _clean_competitions(self, competitions):
+        """delete 'is_competition_in_future' (clean data before saving)"""
+        for competition in competitions:
+            competition.pop("is_competition_in_future", None)
