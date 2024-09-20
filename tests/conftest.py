@@ -1,6 +1,6 @@
 import json
 from unittest.mock import mock_open
-#from unittest.mock import MagicMock  # pour des objets complexes
+# from unittest.mock import MagicMock  # pour des objets complexes
 
 import pytest
 
@@ -44,7 +44,8 @@ def mock_clubs():
             "email": "admin@irontemple.com",
             "points": 4
         },
-        {   "name": "She Lifts",
+        {
+            "name": "She Lifts",
             "email": "kate@shelifts.co.uk",
             "points": 12
         }
@@ -122,8 +123,7 @@ def json_loader(app, monkeypatch, mock_clubs, mock_competitions, mock_bookings):
         # Simulation du chemin des fichiers json dans app.config
         app.config['json_clubs_path'] = 'repertory/mock_clubs.json'
         app.config['json_competitions_path'] = 'repertory/mock_competitions.json'
-        app.config['json_booking_path'] = 'repertory/mock_booking.json'
-
+        app.config['json_booking_path'] = 'repertory/mock_bookings.json'
 
         # for mocking JSONLoaderService._load_data
         def mock_load_data(self, filename, key):
