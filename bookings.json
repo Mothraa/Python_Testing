@@ -3,7 +3,14 @@
         {
             "competition": "Fall Classic 2025",
             "clubs": {
-                "She Lifts": 5
+                "She Lifts": 9
+            }
+        },
+        {
+            "competition": "Spring Festival 2026",
+            "clubs": {
+                "She Lifts": -4,
+                "Simply Lift": 1
             }
         }
     ]
