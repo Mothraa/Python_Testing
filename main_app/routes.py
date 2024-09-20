@@ -29,6 +29,7 @@ def showSummary():
     # cas nominal d'un seul club trouvé pour une adresse
     club = club_by_email_list[0]
 
+    # return redirect(url_for('main.showSummary'))
     return render_template('welcome.html', club=club, competitions=g.competitions)
 
 
@@ -95,8 +96,8 @@ def purchasePlaces():
     # TODO : pb de sauvegarde asynchrone\
     # (erreur dans un des fichiers json => corruption des données ; sauvegarde concomitante,...)
     flash('Great-booking complete!')
-    return redirect(url_for('main.showSummary'))
-    # return render_template('welcome.html', club=club, competitions=g.competitions)
+    # return redirect(url_for('main.showSummary'))
+    return render_template('welcome.html', club=club, competitions=g.competitions)
 
 
 # TODO: Add route for points display
