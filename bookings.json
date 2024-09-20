@@ -1,0 +1,10 @@
+{
+    "bookings": [
+        {
+            "competition": "Fall Classic 2025",
+            "clubs": {
+                "She Lifts": 5
+            }
+        }
+    ]
+}
