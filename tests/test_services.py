@@ -6,11 +6,6 @@ from unittest.mock import MagicMock  # pour mocker des objets complexes (ou meth
 from main_app.services import JSONLoaderService, BookingService
 
 
-# @pytest.fixture
-# def booking_service(mock_clubs, mock_competitions):
-#     return BookingService(clubs=mock_clubs, competitions=mock_competitions)  # mocks defined in conftest.py
-
-
 def test_load_clubs(app, json_loader_service, mock_clubs):
     with app.app_context():
         clubs = json_loader_service.get_clubs()
@@ -173,21 +168,65 @@ def test_save_clubs(json_saver_service, mock_clubs, mock_open_file, monkeypatch)
     """Test saving clubs in json file"""
     # On mock la fonction builtin open
     monkeypatch.setattr('builtins.open', mock_open_file)
-
     # mock de json.dump avec monkeypatch
     mock_json_dump = MagicMock()
     monkeypatch.setattr(json, 'dump', mock_json_dump)
-
     # mock de _load_data pour ne pas lire le fichier
     mock_existing_data = {'clubs': []}
     monkeypatch.setattr(json_saver_service, '_load_data', lambda filename: mock_existing_data)
 
-    # on appelle la methode save_clubs
+    # on appelle la methode a tester : save_clubs
     json_saver_service.save_clubs(mock_clubs)
 
     # On verifie que le fichier a été ouvert correctement
     mock_open_file.assert_called_once_with(json_saver_service.clubs_path, 'w')
-
-    # On vérifie que json.dump est appelé avec les bonnes données
+    # On vérifie que l'ensemble des methodes interne est appelé correctement
     expected_data = {'clubs': mock_clubs}
+    mock_json_dump.assert_called_once_with(expected_data, mock_open_file(), indent=4)
+
+
+def test_save_competitions(json_saver_service, mock_competitions, mock_open_file, monkeypatch):
+    """Test saving competitions in json file"""
+    # On mock la fonction open
+    monkeypatch.setattr('builtins.open', mock_open_file)
+    # On mock de json.dump
+    mock_json_dump = MagicMock()
+    monkeypatch.setattr(json, 'dump', mock_json_dump)
+    # On mock _update_data
+    mock_updated_data = {'competitions': mock_competitions}
+    monkeypatch.setattr(json_saver_service, '_update_data', lambda path, key, data: mock_updated_data)
+    # On mock _clean_competitions (nettoyage de la donnée)
+    mock_clean_competitions = MagicMock()
+    monkeypatch.setattr(json_saver_service, '_clean_competitions', mock_clean_competitions)
+
+    # on appelle la methode a tester : save_competitions
+    json_saver_service.save_competitions(mock_competitions)
+
+    # On verifie que le fichier est bien ouvert en mode écriture
+    mock_open_file.assert_called_once_with(json_saver_service.competitions_path, 'w')
+    # On vérifie que _clean_competitions est correctement appelé (bonnes données)
+    mock_clean_competitions.assert_called_once_with(mock_competitions)
+    # On vérifie que l'ensemble des methodes interne est appelé correctement
+    expected_data = {'competitions': mock_competitions}
+    mock_json_dump.assert_called_once_with(expected_data, mock_open_file(), indent=4)
+
+
+def test_save_bookings(json_saver_service, mock_bookings, mock_open_file, monkeypatch):
+    """Test saving bookings in json file"""
+    # On mock la fonction open
+    monkeypatch.setattr('builtins.open', mock_open_file)
+    # On mock de json.dump
+    mock_json_dump = MagicMock()
+    monkeypatch.setattr(json, 'dump', mock_json_dump)
+    # On mock _update_data
+    mock_updated_data = {'bookings': mock_bookings}
+    monkeypatch.setattr(json_saver_service, '_update_data', lambda path, key, data: mock_updated_data)
+
+    # on appelle la methode a tester : save_bookings
+    json_saver_service.save_bookings(mock_bookings)
+
+    # On verifie que le fichier est bien ouvert en mode écriture
+    mock_open_file.assert_called_once_with(json_saver_service.bookings_path, 'w')
+    # On vérifie que l'ensemble des methodes interne est appelé correctement
+    expected_data = {'bookings': mock_bookings}
     mock_json_dump.assert_called_once_with(expected_data, mock_open_file(), indent=4)
