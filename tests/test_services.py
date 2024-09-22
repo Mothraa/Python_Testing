@@ -1,4 +1,7 @@
+import json
+
 import pytest
+from unittest.mock import MagicMock  # pour mocker des objets complexes (ou methodes)
 
 from main_app.services import JSONLoaderService, BookingService
 
@@ -8,21 +11,21 @@ from main_app.services import JSONLoaderService, BookingService
 #     return BookingService(clubs=mock_clubs, competitions=mock_competitions)  # mocks defined in conftest.py
 
 
-def test_load_clubs(app, json_loader, mock_clubs):
+def test_load_clubs(app, json_loader_service, mock_clubs):
     with app.app_context():
-        clubs = json_loader.get_clubs()
+        clubs = json_loader_service.get_clubs()
     assert clubs == mock_clubs
 
 
-def test_load_competitions(app, json_loader, mock_competitions):
+def test_load_competitions(app, json_loader_service, mock_competitions):
     with app.app_context():
-        competitions = json_loader.get_competitions()
+        competitions = json_loader_service.get_competitions()
     assert competitions == mock_competitions
 
 
-def test_load_bookings(app, json_loader, mock_bookings):
+def test_load_bookings(app, json_loader_service, mock_bookings):
     with app.app_context():
-        bookings = json_loader.get_bookings()
+        bookings = json_loader_service.get_bookings()
     assert bookings == mock_bookings
 
 
@@ -164,3 +167,27 @@ def test_is_competition_in_past(app, mock_clubs, mock_competitions):
     booking_service = BookingService(mock_clubs, mock_competitions)
     past_competition = mock_competitions[0]  # Spring Festival (in past, 2020)
     assert booking_service.is_competition_in_future(past_competition) is False
+
+
+def test_save_clubs(json_saver_service, mock_clubs, mock_open_file, monkeypatch):
+    """Test saving clubs in json file"""
+    # On mock la fonction builtin open
+    monkeypatch.setattr('builtins.open', mock_open_file)
+
+    # mock de json.dump avec monkeypatch
+    mock_json_dump = MagicMock()
+    monkeypatch.setattr(json, 'dump', mock_json_dump)
+
+    # mock de _load_data pour ne pas lire le fichier
+    mock_existing_data = {'clubs': []}
+    monkeypatch.setattr(json_saver_service, '_load_data', lambda filename: mock_existing_data)
+
+    # on appelle la methode save_clubs
+    json_saver_service.save_clubs(mock_clubs)
+
+    # On verifie que le fichier a été ouvert correctement
+    mock_open_file.assert_called_once_with(json_saver_service.clubs_path, 'w')
+
+    # On vérifie que json.dump est appelé avec les bonnes données
+    expected_data = {'clubs': mock_clubs}
+    mock_json_dump.assert_called_once_with(expected_data, mock_open_file(), indent=4)

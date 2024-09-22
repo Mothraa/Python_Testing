@@ -1,11 +1,10 @@
 import json
 from unittest.mock import mock_open
-# from unittest.mock import MagicMock  # pour des objets complexes
 
 import pytest
 
 from main_app import create_app
-from main_app.services import JSONLoaderService
+from main_app.services import JSONLoaderService, JSONSaverService
 
 
 @pytest.fixture
@@ -117,7 +116,7 @@ def mock_json_with_wrong_key(monkeypatch):
 
 
 @pytest.fixture
-def json_loader(app, monkeypatch, mock_clubs, mock_competitions, mock_bookings):
+def json_loader_service(app, monkeypatch, mock_clubs, mock_competitions, mock_bookings):
     """ Fixture to simulate services.JSONLoaderService"""
     with app.app_context():
         # Simulation du chemin des fichiers json dans app.config
@@ -138,3 +137,18 @@ def json_loader(app, monkeypatch, mock_clubs, mock_competitions, mock_bookings):
         monkeypatch.setattr(JSONLoaderService, '_load_data', mock_load_data)
 
     return JSONLoaderService()
+
+
+@pytest.fixture
+def json_saver_service(app):
+    """fixture for instanciate JSONSaverService"""
+    with app.app_context():
+        return JSONSaverService()
+
+
+@pytest.fixture
+def mock_open_file(monkeypatch):
+    """Fixture for open"""
+    mock_open_instance = mock_open()
+    monkeypatch.setattr('builtins.open', mock_open_instance)
+    return mock_open_instance
