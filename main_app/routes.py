@@ -11,7 +11,9 @@ bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    json_loader = JSONLoaderService()
+    clubs = json_loader.get_clubs()
+    return render_template('index.html', clubs=clubs)
 
 
 @bp.route('/showSummary', methods=['POST'])

@@ -1,0 +1,16 @@
+/* for index.html tab : */
+th,
+td {
+    padding: 8px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+th {
+    background-color: #d3d3d3;
+}
+tr:nth-child(odd) {
+    background-color: #efefef;
+}
+tr:nth-child(even) {
+    background-color: #ffffff;
+}

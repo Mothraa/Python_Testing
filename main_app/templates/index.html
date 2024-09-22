@@ -1,22 +1,44 @@
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GUDLFT Registration</title>
-  </head>
-  <body>
-    <h1>Welcome to the GUDLFT Registration Portal!</h1>
-    {% with messages = get_flashed_messages() %} {% if messages %}
-    <ul class="flashes">
-      {% for message in messages %}
-      <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %} {% endwith %} Please enter your secretary email to continue:
-    <form action="showSummary" method="post">
-      <label for="email">Email:</label>
-      <input type="email" name="email" id="email" required />
-      <button type="submit">Enter</button>
-    </form>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>GUDLFT Registration</title>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='styles.css') }}"
+        />
+    </head>
+    <body>
+        <h1>Welcome to the GUDLFT Registration Portal!</h1>
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %} {% endwith %} Please enter your secretary email to continue:
+        <form action="showSummary" method="post">
+            <label for="email">Email:</label>
+            <input type="email" name="email" id="email" required />
+            <button type="submit">Enter</button>
+        </form>
+
+        <h2>Club Points</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Club Name</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for club in clubs %}
+                <tr>
+                    <td>{{ club.name }}</td>
+                    <td>{{ club.points }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
 </html>
