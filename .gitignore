@@ -38,16 +38,16 @@ output/
 .log/
 log/
 
-
 # ignore all log files
 *.log
 
 # tests
 .coverage/
+.coverage 
+.coveragerc
 htmlcov/
 .pytest_cache/
 assets/
-#tests/
 
 # media
 media/
