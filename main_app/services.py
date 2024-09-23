@@ -1,4 +1,4 @@
-import json
+import json, copy
 from datetime import datetime
 
 from flask import current_app
@@ -143,8 +143,9 @@ class JSONSaverService:
 
     def save_competitions(self, competitions):
         """Save competitions"""
-        self._clean_competitions(competitions)
-        updated_data = self._update_data(self.competitions_path, 'competitions', competitions)
+        competitions_copy = copy.deepcopy(competitions)  # copie pour éviter d'ecraser g.competitions
+        self._clean_competitions(competitions_copy)
+        updated_data = self._update_data(self.competitions_path, 'competitions', competitions_copy)
         self._save_data(self.competitions_path, updated_data)
 
     def save_bookings(self, bookings):
@@ -171,7 +172,6 @@ class JSONSaverService:
     def _update_data(self, filename, key, new_data):
         """ load existing data and return updated datas"""
         existing_data = self._load_data(filename)
-        # print('DEBUG data existante', existing_data)
         existing_data[key] = new_data
         return existing_data
 

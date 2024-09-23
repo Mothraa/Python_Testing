@@ -109,7 +109,6 @@ def purchasePlaces():
     save_service.save_bookings(updated_bookings)
 
     flash('Great-booking complete!')
-    # return redirect(url_for('main.showSummary'))
     return render_template('welcome.html', club=club, competitions=g.competitions)
 
 
