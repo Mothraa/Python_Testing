@@ -50,6 +50,7 @@ def mock_clubs():
         }
     ]
 
+
 @pytest.fixture
 def mock_competitions():
     return [
