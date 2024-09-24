@@ -152,13 +152,13 @@ def test_with_max_places_exceed_limit(app):
     assert booking_service.is_ok_with_max_places_limit(13) is False
 
 
-def test_is_competition_in_future(app, mock_clubs, mock_competitions):
+def test_is_competition_in_the_future(app, mock_clubs, mock_competitions):
     booking_service = BookingService(mock_clubs, mock_competitions)
     future_competition = mock_competitions[2]  # Fall Classic 2025 (in future)
     assert booking_service.is_competition_in_future(future_competition) is True
 
 
-def test_is_competition_in_past(app, mock_clubs, mock_competitions):
+def test_is_competition_in_the_past(app, mock_clubs, mock_competitions):
     booking_service = BookingService(mock_clubs, mock_competitions)
     past_competition = mock_competitions[0]  # Spring Festival (in past, 2020)
     assert booking_service.is_competition_in_future(past_competition) is False
