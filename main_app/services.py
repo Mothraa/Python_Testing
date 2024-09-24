@@ -29,6 +29,7 @@ class JSONLoaderService:
         return self._load_data(self.bookings_path, 'bookings')
 
     def _load_data(self, filename, key):
+        """load json data from file"""
         try:
             with open(filename, 'r') as f:
                 data = json.load(f)
@@ -41,11 +42,11 @@ class JSONLoaderService:
 
 
 class BookingService:
+    """Services for booking places in competitions"""
     def __init__(self, clubs, competitions):
         self.clubs = clubs
         self.competitions = competitions
         self.max_places = current_app.config.get('MAX_PLACES')
-        # self.data_loader = JSONLoaderService()
 
     def get_club_by_name(self, club_name):
         """returns a club from its name"""
@@ -61,25 +62,31 @@ class BookingService:
                 return competition
         return None
 
+    def get_reserved_places(self, bookings, club, competition) -> int:
+        """Return number of places reserved by club for the competition"""
+        existing_booking = self._find_existing_booking(bookings, competition)
+        if existing_booking and club['name'] in existing_booking['clubs']:
+            return existing_booking['clubs'][club['name']]
+        return 0  # si pas de réservation trouvée
+
     def has_enough_places(self, competition, places_required):
+        """check if the competition has enough places"""
         return int(competition['numberOfPlaces']) >= places_required
 
     def is_ok_with_max_places_limit(self, places_required):
+        """check if the booking request is under the limit fixed"""
         return places_required <= self.max_places
 
     def has_enough_points(self, club, places_required):
+        """check if the club has enough points"""
         return club['points'] >= places_required
 
     def update_competition_places(self, competition, places_required):
+        """update competition number of places"""
         competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
 
-    def is_competition_in_future(self, competition) -> bool:
-        competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
-        # TODO autoriser pour la date J+1 uniquement (sans heure) ?
-        return competition_date > datetime.now()
-
     def add_future_status_to_competitions(self):
-        """add the attribut "competition_wit"""
+        """add the boolean attribut "competition_with_future_status to competitions data"""
         competitions_with_future_status = []
         for competition in self.competitions:
             competition_with_status = dict(competition)
@@ -87,12 +94,11 @@ class BookingService:
             competitions_with_future_status.append(competition_with_status)
         return competitions_with_future_status
 
-    def get_reserved_places(self, bookings, club, competition) -> int:
-        """Return number of places reserved by club for the competition"""
-        existing_booking = self._find_existing_booking(bookings, competition)
-        if existing_booking and club['name'] in existing_booking['clubs']:
-            return existing_booking['clubs'][club['name']]
-        return 0  # si pas de réservation trouvée
+    def is_competition_in_future(self, competition) -> bool:
+        """check if competition is past or in future"""
+        competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
+        # TODO autoriser pour la date J+1 uniquement (sans heure) ?
+        return competition_date > datetime.now()
 
     def handle_bookings(self, club, competition, places_required, bookings):
         """Handle bookings..."""
@@ -103,19 +109,11 @@ class BookingService:
         # si c'est une nouvelle réservation pour la compétition
         else:
             self._add_new_booking(bookings, club, competition, places_required)
-
         return bookings
 
     def _find_existing_booking(self, bookings, competition):
-        """Trouve une réservation existante pour la compétition donnée"""
-        # for booking in bookings:
-        #     if booking['competition'] == competition['name']:
-        #         return booking
-
-        competition_name = competition['name']  # Assure-toi d'extraire le nom de la compétition
-        # if competition_name in bookings:
-        #     return bookings[competition_name]
-        # return None
+        """Find a booking for a specified competition"""
+        competition_name = competition['name']
         return bookings.get(competition_name, None)
 
     def _update_existing_booking(self, existing_booking, club, places_required):
@@ -159,6 +157,7 @@ class JSONSaverService:
         self._save_data(self.bookings_path, updated_data)
 
     def _load_data(self, filename):
+        """load json data from file"""
         try:
             with open(filename, 'r') as f:
                 return json.load(f)
@@ -167,6 +166,7 @@ class JSONSaverService:
             raise Exception(f"Erreur de decodage de {filename}")
 
     def _save_data(self, filename, data):
+        """save json data as file"""
         try:
             with open(filename, 'w') as f:
                 json.dump(data, f, indent=4)
