@@ -4,7 +4,7 @@ from unittest.mock import mock_open
 import pytest
 
 from main_app import create_app
-from main_app.services import JSONLoaderService, JSONSaverService
+from main_app.services import JSONLoaderService, JSONSaverService, BookingService
 
 
 @pytest.fixture
@@ -50,7 +50,6 @@ def mock_clubs():
         }
     ]
 
-
 @pytest.fixture
 def mock_competitions():
     return [
@@ -89,6 +88,15 @@ def mock_bookings():
                 "club2": 4
             }
             }
+
+
+@pytest.fixture
+def mock_clubs_multiple_use_mail():
+    """ for moking case when an email is used for to clubs identification """
+    return [
+        {'name': 'Club Toto', 'email': 'pipo@mail.com', 'points': 10},
+        {'name': 'Club Tata', 'email': 'pipo@mail.com', 'points': 2}
+    ]
 
 
 @pytest.fixture
@@ -152,3 +160,10 @@ def mock_open_file(monkeypatch):
     mock_open_instance = mock_open()
     monkeypatch.setattr('builtins.open', mock_open_instance)
     return mock_open_instance
+
+
+@pytest.fixture
+def booking_service(app, mock_clubs, mock_competitions):
+    """fixture for instanciate BookingService"""
+    with app.app_context():
+        return BookingService(clubs=mock_clubs, competitions=mock_competitions)

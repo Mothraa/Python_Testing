@@ -1,4 +1,5 @@
-import json, copy
+import json
+import copy
 from datetime import datetime
 
 from flask import current_app
@@ -107,10 +108,15 @@ class BookingService:
 
     def _find_existing_booking(self, bookings, competition):
         """Trouve une réservation existante pour la compétition donnée"""
-        for booking in bookings:
-            if booking['competition'] == competition['name']:
-                return booking
-        return None
+        # for booking in bookings:
+        #     if booking['competition'] == competition['name']:
+        #         return booking
+
+        competition_name = competition['name']  # Assure-toi d'extraire le nom de la compétition
+        # if competition_name in bookings:
+        #     return bookings[competition_name]
+        # return None
+        return bookings.get(competition_name, None)
 
     def _update_existing_booking(self, existing_booking, club, places_required):
         """Met à jour le nombre de places réservées pour un club existant."""
@@ -124,10 +130,9 @@ class BookingService:
 
     def _add_new_booking(self, bookings, club, competition, places_required):
         """Add a new book for a club"""
-        bookings.append({
-            'competition': competition['name'],
-            'clubs': {club['name']: places_required}
-        })
+        competition_name = competition['name']
+        bookings[competition_name] = {'clubs': {}}
+        bookings[competition_name]['clubs'][club['name']] = places_required
 
 
 class JSONSaverService:
