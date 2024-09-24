@@ -32,6 +32,61 @@ def test_email_not_valid(client):
     assert b'Email not found' in response.data
 
 
+def test_purchase_places_in_a_past_competition(client, mocker, mock_clubs, mock_competitions, booking_service):
+    # On simule une compétition dans le passé
+    club = mock_clubs[0]
+    competition = mock_competitions[0]
+    mocker.patch.object(booking_service, 'is_competition_in_future', return_value=False)
+
+    # données pour la requete
+    data = {
+        'club': club['name'],
+        'competition': competition['name'],
+        'places': 1
+    }
+    response = client.post('/purchasePlaces', data=data, follow_redirects=True)
+
+    assert b"Competition already past" in response.data
+    assert response.status_code == 200
+    assert b"Welcome" in response.data
+
+
+def test_booking_reservation_is_ok(client, json_loader_service, mock_clubs, mock_competitions, mock_bookings):
+    """ mock a valid places reservation"""
+    response = client.post('/purchasePlaces', data={
+        'club': 'Simply Lift',
+        'competition': 'Fall Classic 2025',
+        'places': '2'
+    })
+    assert response.status_code == 200
+    assert b'Great-booking complete!' in response.data
+
+
+def test_book_club_and_competition_ok(client, mock_clubs, mock_competitions):
+    """Test pour un club et une compétition existants."""
+    response = client.get('/book/Spring Festival/Simply Lift')
+
+    assert response.status_code == 200
+    assert b'Simply Lift' in response.data
+    assert b'Spring Festival' in response.data
+
+
+def test_book_with_unknown_club(client, mock_clubs, mock_competitions):
+    """Test pour un club inexistant."""
+    response = client.get('/book/Spring Festival/fake_Club', follow_redirects=True)
+
+    assert response.status_code == 200  # redirection
+    assert b"Something went wrong-please try again" in response.data
+
+
+def test_book_with_unknown_competition(client, mock_clubs, mock_competitions):
+    """Test pour une compétition inexistante."""
+    response = client.get('/book/fake_Competition/Simply Lift', follow_redirects=True)
+
+    assert response.status_code == 200  # redirection
+    assert b"Something went wrong-please try again" in response.data
+
+
 def test_logout(client):
     response = client.get('/logout', follow_redirects=True)
     assert response.status_code == 200
