@@ -1,4 +1,8 @@
 
+import pytest
+
+
+@pytest.mark.integration
 def test_integration(client, booking_service, json_loader_service, mock_clubs, mock_competitions):
     # page d'accueil
     response = client.get('/')

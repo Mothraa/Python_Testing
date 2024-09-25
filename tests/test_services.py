@@ -6,24 +6,28 @@ from unittest.mock import MagicMock  # pour mocker des objets complexes (ou meth
 from main_app.services import JSONLoaderService, BookingService
 
 
+@pytest.mark.unit
 def test_load_clubs(app, json_loader_service, mock_clubs):
     with app.app_context():
         clubs = json_loader_service.get_clubs()
     assert clubs == mock_clubs
 
 
+@pytest.mark.unit
 def test_load_competitions(app, json_loader_service, mock_competitions):
     with app.app_context():
         competitions = json_loader_service.get_competitions()
     assert competitions == mock_competitions
 
 
+@pytest.mark.unit
 def test_load_bookings(app, json_loader_service, mock_bookings):
     with app.app_context():
         bookings = json_loader_service.get_bookings()
     assert bookings == mock_bookings
 
 
+@pytest.mark.unit
 def test_load_clubs_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
     loader = JSONLoaderService()
     monkeypatch.setattr(loader, '_load_data', lambda filename, key: None)
@@ -31,6 +35,7 @@ def test_load_clubs_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
     assert clubs is None
 
 
+@pytest.mark.unit
 def test_load_competitions_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
     loader = JSONLoaderService()
     monkeypatch.setattr(loader, '_load_data', lambda filename, key: None)
@@ -38,6 +43,7 @@ def test_load_competitions_wrong_key(app, monkeypatch, mock_json_with_wrong_key)
     assert competitions is None
 
 
+@pytest.mark.unit
 def test_load_bookings_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
     loader = JSONLoaderService()
     monkeypatch.setattr(loader, '_load_data', lambda filename, key: None)
@@ -45,24 +51,28 @@ def test_load_bookings_wrong_key(app, monkeypatch, mock_json_with_wrong_key):
     assert bookings is None
 
 
+@pytest.mark.unit
 def test_load_clubs_file_not_found(app, monkeypatch, mock_open_missing_file):
     loader = JSONLoaderService()
     with pytest.raises(Exception):
         loader.get_clubs()
 
 
+@pytest.mark.unit
 def test_load_competitions_file_not_found(app, monkeypatch, mock_open_missing_file):
     loader = JSONLoaderService()
     with pytest.raises(Exception):
         loader.get_competitions()
 
 
+@pytest.mark.unit
 def test_load_bookings_file_not_found(app, monkeypatch, mock_open_missing_file):
     loader = JSONLoaderService()
     with pytest.raises(Exception):
         loader.get_bookings()
 
 
+@pytest.mark.unit
 def test_load_clubs_json_decode_error(app, monkeypatch, mock_open_corrupted_file):
     loader = JSONLoaderService()
     with app.app_context():
@@ -70,6 +80,7 @@ def test_load_clubs_json_decode_error(app, monkeypatch, mock_open_corrupted_file
             loader.get_clubs()
 
 
+@pytest.mark.unit
 def test_load_competitions_json_decode_error(app, monkeypatch, mock_open_corrupted_file):
     loader = JSONLoaderService()
     with app.app_context():
@@ -77,6 +88,7 @@ def test_load_competitions_json_decode_error(app, monkeypatch, mock_open_corrupt
             loader.get_competitions()
 
 
+@pytest.mark.unit
 def test_load_bookings_json_decode_error(app, monkeypatch, mock_open_corrupted_file):
     loader = JSONLoaderService()
     with app.app_context():
@@ -84,6 +96,7 @@ def test_load_bookings_json_decode_error(app, monkeypatch, mock_open_corrupted_f
             loader.get_bookings()
 
 
+@pytest.mark.unit
 def test_club_points_are_integers(app):
     loader = JSONLoaderService()
     with app.app_context():
@@ -93,6 +106,7 @@ def test_club_points_are_integers(app):
         assert isinstance(points, int)
 
 
+@pytest.mark.unit
 def test_competitions_places_are_integers(app):
     loader = JSONLoaderService()
     with app.app_context():
@@ -102,6 +116,7 @@ def test_competitions_places_are_integers(app):
         assert isinstance(places, int)
 
 
+@pytest.mark.unit
 def test_get_club_by_name(app, mock_clubs):
     booking_service = BookingService(mock_clubs, [])
     result = booking_service.get_club_by_name("Iron Temple")
@@ -111,6 +126,7 @@ def test_get_club_by_name(app, mock_clubs):
     assert result is None
 
 
+@pytest.mark.unit
 def test_get_competition_by_name(app, mock_competitions):
     booking_service = BookingService([], mock_competitions)
     result = booking_service.get_competition_by_name("Fall Classic")
@@ -120,6 +136,7 @@ def test_get_competition_by_name(app, mock_competitions):
     assert result is None
 
 
+@pytest.mark.unit
 def test_has_enough_places(app, mock_competitions):
     booking_service = BookingService([], mock_competitions)
     competition = booking_service.get_competition_by_name("Spring Festival")  # 25 places
@@ -127,6 +144,7 @@ def test_has_enough_places(app, mock_competitions):
     assert booking_service.has_enough_places(competition, 26) is False
 
 
+@pytest.mark.unit
 def test_has_enough_points(app, mock_clubs):
     booking_service = BookingService(mock_clubs, [])
     # 'Iron Temple' => 4 points
@@ -138,6 +156,7 @@ def test_has_enough_points(app, mock_clubs):
     assert result is False
 
 
+@pytest.mark.unit
 def test_with_max_places_under_limit(app):
     # instanciation sans données juste pour appeler la methode
     booking_service = BookingService([], [])
@@ -145,6 +164,7 @@ def test_with_max_places_under_limit(app):
     assert booking_service.is_ok_with_max_places_limit(11) is True
 
 
+@pytest.mark.unit
 def test_with_max_places_exceed_limit(app):
     # instanciation sans données juste pour appeler la methode
     booking_service = BookingService([], [])
@@ -152,18 +172,21 @@ def test_with_max_places_exceed_limit(app):
     assert booking_service.is_ok_with_max_places_limit(13) is False
 
 
+@pytest.mark.unit
 def test_is_competition_in_the_future(app, mock_clubs, mock_competitions):
     booking_service = BookingService(mock_clubs, mock_competitions)
     future_competition = mock_competitions[2]  # Fall Classic 2025 (in future)
     assert booking_service.is_competition_in_future(future_competition) is True
 
 
+@pytest.mark.unit
 def test_is_competition_in_the_past(app, mock_clubs, mock_competitions):
     booking_service = BookingService(mock_clubs, mock_competitions)
     past_competition = mock_competitions[0]  # Spring Festival (in past, 2020)
     assert booking_service.is_competition_in_future(past_competition) is False
 
 
+@pytest.mark.unit
 def test_save_clubs(json_saver_service, mock_clubs, mock_open_file, monkeypatch):
     """Test saving clubs in json file"""
     # On mock la fonction builtin open
@@ -185,6 +208,7 @@ def test_save_clubs(json_saver_service, mock_clubs, mock_open_file, monkeypatch)
     mock_json_dump.assert_called_once_with(expected_data, mock_open_file(), indent=4)
 
 
+@pytest.mark.unit
 def test_save_competitions(json_saver_service, mock_competitions, mock_open_file, monkeypatch):
     """Test saving competitions in json file"""
     # On mock la fonction open
@@ -211,6 +235,7 @@ def test_save_competitions(json_saver_service, mock_competitions, mock_open_file
     mock_json_dump.assert_called_once_with(expected_data, mock_open_file(), indent=4)
 
 
+@pytest.mark.unit
 def test_save_bookings(json_saver_service, mock_bookings, mock_open_file, monkeypatch):
     """Test saving bookings in json file"""
     # On mock la fonction open
