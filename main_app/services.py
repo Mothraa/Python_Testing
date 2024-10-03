@@ -62,13 +62,6 @@ class BookingService:
                 return competition
         return None
 
-    def get_reserved_places(self, bookings, club, competition) -> int:
-        """Return number of places reserved by club for the competition"""
-        existing_booking = self._find_existing_booking(bookings, competition)
-        if existing_booking and club['name'] in existing_booking['clubs']:
-            return existing_booking['clubs'][club['name']]
-        return 0  # si pas de réservation trouvée
-
     def has_enough_places(self, competition, places_required):
         """check if the competition has enough places"""
         return int(competition['numberOfPlaces']) >= places_required
@@ -80,10 +73,6 @@ class BookingService:
     def has_enough_points(self, club, places_required):
         """check if the club has enough points"""
         return club['points'] >= places_required
-
-    def update_competition_places(self, competition, places_required):
-        """update competition number of places"""
-        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
 
     def add_future_status_to_competitions(self):
         """add the boolean attribut "competition_with_future_status to competitions data"""
@@ -97,8 +86,23 @@ class BookingService:
     def is_competition_in_future(self, competition) -> bool:
         """check if competition is past or in future"""
         competition_date = datetime.strptime(competition['date'], '%Y-%m-%d %H:%M:%S')
-        # TODO autoriser pour la date J+1 uniquement (sans heure) ?
+        # TODO autoriser pour la date J+1 uniquement (sans heure) ? a spécifier.
         return competition_date > datetime.now()
+
+    def get_reserved_places(self, bookings, club, competition) -> int:
+        """Return number of places reserved by club for the competition"""
+        existing_booking = self._find_existing_booking(bookings, competition)
+        if not existing_booking:
+            return 0  # si pas de réservation trouvée
+        club_booking = next((cb for cb in existing_booking['clubs'] if cb['name'] == club['name']), {'places': 0})
+        return club_booking['places']
+        # if existing_booking and club['name'] in existing_booking['clubs']:
+        #     return existing_booking['clubs'][club['name']]
+        # return 0  # si pas de réservation trouvée
+
+    def update_competition_places(self, competition, places_required):
+        """update competition number of places"""
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - places_required
 
     def handle_bookings(self, club, competition, places_required, bookings):
         """Handle bookings..."""
@@ -113,24 +117,33 @@ class BookingService:
 
     def _find_existing_booking(self, bookings, competition):
         """Find a booking for a specified competition"""
-        competition_name = competition['name']
-        return bookings.get(competition_name, None)
+        for booking in bookings.get('bookings', []):
+            if booking['competition'] == competition['name']:
+                return booking
+        return None
 
     def _update_existing_booking(self, existing_booking, club, places_required):
-        """Met à jour le nombre de places réservées pour un club existant."""
-        # si le club a déjà pris des places pour le tournoi
-        if club['name'] in existing_booking['clubs']:
-            existing_booking['clubs'][club['name']] += places_required
-        # si le tournoi a déjà des places reservées (par d'autres clubs)\
-        # mais que le club n'a pas encore reservé de place
-        else:
-            existing_booking['clubs'][club['name']] = places_required
+        """update places number in case of club already reserved places for this tournament"""
+        for club_reservation in existing_booking['clubs']:
+            if club_reservation['name'] == club['name']:
+                # update de la valeur
+                club_reservation['places'] += places_required
+                return True
 
     def _add_new_booking(self, bookings, club, competition, places_required):
-        """Add a new book for a club"""
-        competition_name = competition['name']
-        bookings[competition_name] = {'clubs': {}}
-        bookings[competition_name]['clubs'][club['name']] = places_required
+        """Add a new book for a club (first booking for this tournament)"""
+        new_booking = {
+            "competition": competition['name'],
+            "clubs": [
+                {
+                    "name": club['name'],
+                    "places": places_required
+                }
+            ]
+        }
+        if 'bookings' not in bookings:
+            bookings['bookings'] = []
+        bookings['bookings'].append(new_booking)
 
 
 class JSONSaverService:
