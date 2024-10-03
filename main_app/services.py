@@ -96,9 +96,6 @@ class BookingService:
             return 0  # si pas de réservation trouvée
         club_booking = next((cb for cb in existing_booking['clubs'] if cb['name'] == club['name']), {'places': 0})
         return club_booking['places']
-        # if existing_booking and club['name'] in existing_booking['clubs']:
-        #     return existing_booking['clubs'][club['name']]
-        # return 0  # si pas de réservation trouvée
 
     def update_competition_places(self, competition, places_required):
         """update competition number of places"""
