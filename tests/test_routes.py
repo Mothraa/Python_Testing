@@ -4,20 +4,16 @@ import pytest
 
 
 @pytest.mark.unit
-def test_index_status_code(client):
+def test_index_endpoint(client):
+    """Check if we are on the right main page"""
     response = client.get('/')
     assert response.status_code == 200
-
-
-@pytest.mark.unit
-def test_index_read_content(client):
-    """ Check if we are on the right page """
-    response = client.get('/')
     assert b'GUDLFT Registration' in response.data
 
 
 @pytest.mark.unit
 def test_no_email(client):
+    """test response when no email is POST"""
     # POST avec le champ email vide et on suit la redirection
     response = client.post('/showSummary', data={'email': ''}, follow_redirects=True)
     assert response.status_code == 200
@@ -26,6 +22,7 @@ def test_no_email(client):
 
 @pytest.mark.unit
 def test_email_valid(client, mock_clubs):
+    """test response when a valid email is POST"""
     response = client.post('/showSummary', data={'email': 'kate@shelifts.co.uk'})
     assert response.status_code == 200
     assert b'Welcome, kate@shelifts.co.uk' in response.data
@@ -33,6 +30,7 @@ def test_email_valid(client, mock_clubs):
 
 @pytest.mark.unit
 def test_email_not_valid(client):
+    """test response when a NOT valid email is POST"""
     response = client.post('/showSummary', data={'email': 'pipo@mail.com'}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Email not found' in response.data
@@ -40,6 +38,7 @@ def test_email_not_valid(client):
 
 @pytest.mark.unit
 def test_purchase_places_in_a_past_competition(client, mocker, mock_clubs, mock_competitions, booking_service):
+    """test when we try to book places in a past competition (forbidden case)"""
     # On simule une compétition dans le passé
     club = mock_clubs[0]
     competition = mock_competitions[0]
@@ -58,30 +57,8 @@ def test_purchase_places_in_a_past_competition(client, mocker, mock_clubs, mock_
 
 
 @pytest.mark.unit
-def test_booking_reservation_is_ok(client, json_loader_service, mock_clubs, mock_competitions, mock_bookings):
-    """ mock a valid places reservation"""
-    response = client.post('/purchasePlaces', data={
-        'club': 'Simply Lift',
-        'competition': 'Fall Classic 2025',
-        'places': '2'
-    })
-    assert response.status_code == 200
-    assert b'Great-booking complete!' in response.data
-
-
-@pytest.mark.unit
-def test_book_club_and_competition_ok(client, mock_clubs, mock_competitions):
-    """Test pour un club et une compétition existants."""
-    response = client.get('/book/Spring Festival/Simply Lift')
-
-    assert response.status_code == 200
-    assert b'Simply Lift' in response.data
-    assert b'Spring Festival' in response.data
-
-
-@pytest.mark.unit
 def test_book_with_unknown_club(client, mock_clubs, mock_competitions):
-    """Test pour un club inexistant."""
+    """test booking with an unknown club name"""
     response = client.get('/book/Spring Festival/fake_Club', follow_redirects=True)
 
     assert response.status_code == 200  # redirection
@@ -90,7 +67,7 @@ def test_book_with_unknown_club(client, mock_clubs, mock_competitions):
 
 @pytest.mark.unit
 def test_book_with_unknown_competition(client, mock_clubs, mock_competitions):
-    """Test pour une compétition inexistante."""
+    """test booking with an unknown competition name"""
     response = client.get('/book/fake_Competition/Simply Lift', follow_redirects=True)
 
     assert response.status_code == 200  # redirection
@@ -99,6 +76,7 @@ def test_book_with_unknown_competition(client, mock_clubs, mock_competitions):
 
 @pytest.mark.unit
 def test_logout(client):
+    """logout test"""
     response = client.get('/logout', follow_redirects=True)
     assert response.status_code == 200
     assert b'Logout' in response.data

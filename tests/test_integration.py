@@ -1,21 +1,21 @@
-
 import pytest
 
 
 @pytest.mark.integration
-def test_integration(client, booking_service, json_loader_service, mock_clubs, mock_competitions):
-    # page d'accueil
+def test_integration(json_loader_service, json_saver_service, client, booking_service):
+    """ integration test : user login and bookings competitions places, then logout"""
     response = client.get('/')
     assert response.status_code == 200
 
     # Identification de l'utilisateur + chargement de la page welcome
-    response = client.post('/showSummary', data={'email': 'john@simplylift.co'})  # Utilisez l'email approprié
-    assert b'Welcome, john@simplylift.co' in response.data  # Vérifie que le bon email est affiché
-    assert b'Points available: 13' in response.data  # Vérifie que les points sont corrects
+    response = client.post('/showSummary', data={'email': 'john@simplylift.co'})
+    assert response.status_code == 200
+    assert b'Welcome, john@simplylift.co' in response.data
+    assert b'Points available: 13' in response.data
 
     # chargement de la page de reservation (booking)
-    competition_name = 'Fall Classic 2025'
-    club_name = 'Simply Lift'
+    competition_name = 'Fall Classic 2025 Mock'
+    club_name = 'Simply Lift Mock'
     competition = booking_service.get_competition_by_name(competition_name)
     response = client.get(f'/book/{competition_name}/{club_name}')
     assert response.status_code == 200

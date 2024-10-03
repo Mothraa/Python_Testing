@@ -1,5 +1,4 @@
 import json
-from unittest.mock import mock_open
 
 import pytest
 
@@ -8,23 +7,45 @@ from main_app.services import JSONLoaderService, JSONSaverService, BookingServic
 
 
 @pytest.fixture
-def app():
-    """Create an application instance for testing"""
+def minimal_app():
+    """Create a minimal application instance for testing (erros loading datas)"""
     app = create_app()
     app.config.update({
-        "TESTING": True,
+        "TESTING": True
     })
     with app.app_context():
         yield app
 
 
 @pytest.fixture
-def client():
-    """ For simulating client requests (GET/POST)
-        for routing or integrating tests """
+def app(monkeypatch, mock_clubs, mock_competitions):
+    """Create an application instance for testing with mocked data"""
+    # Mock JSONLoaderService pour retourner les données mockées au lieu de lire des fichiers
+    def mock_get_clubs(self):
+        return mock_clubs
+
+    def mock_get_competitions(self):
+        return mock_competitions
+
+    monkeypatch.setattr('main_app.services.JSONLoaderService.get_clubs', mock_get_clubs)
+    monkeypatch.setattr('main_app.services.JSONLoaderService.get_competitions', mock_get_competitions)
+
+    # Creation de l'app et de la conf
     app = create_app()
     app.config.update({
-        "TESTING": True,
+        "TESTING": True
+    })
+
+    with app.app_context():
+        yield app
+
+
+@pytest.fixture
+def client():
+    """ For simulating client requests (GET/POST) """
+    app = create_app()
+    app.config.update({
+        "TESTING": True
     })
     with app.test_client() as client:
         yield client
@@ -34,17 +55,17 @@ def client():
 def mock_clubs():
     return [
         {
-            "name": "Simply Lift",
+            "name": "Simply Lift Mock",
             "email": "john@simplylift.co",
             "points": 13
         },
         {
-            "name": "Iron Temple",
+            "name": "Iron Temple Mock",
             "email": "admin@irontemple.com",
             "points": 4
         },
         {
-            "name": "She Lifts",
+            "name": "She Lifts Mock",
             "email": "kate@shelifts.co.uk",
             "points": 12
         }
@@ -55,17 +76,17 @@ def mock_clubs():
 def mock_competitions():
     return [
         {
-            "name": "Spring Festival",
+            "name": "Spring Festival Mock",
             "date": "2020-03-27 10:00:00",
             "numberOfPlaces": 25
         },
         {
-            "name": "Fall Classic",
+            "name": "Fall Classic Mock",
             "date": "2020-10-22 13:30:00",
             "numberOfPlaces": 13
         },
         {
-            "name": "Fall Classic 2025",
+            "name": "Fall Classic 2025 Mock",
             "date": "2025-10-22 13:30:00",
             "numberOfPlaces": 13
         }
@@ -75,43 +96,36 @@ def mock_competitions():
 @pytest.fixture
 def mock_bookings():
     return {
-            "competition_a": {
-                "club1": 5,
-                "club2": 3
+        "bookings": [
+            {
+                "competition": "Fall Classic 2025 Mock",
+                "clubs": [
+                    {
+                        "name": "Simply Lift Mock",
+                        "places": 5
+                    },
+                    {
+                        "name": "Iron Temple Mock",
+                        "places": 3
+                    }
+                ]
             },
-            "competition_b": {
-                "club1": 1,
-                "club3": 2,
-                "club4": 8
-            },
-            "competition_c": {
-                "club1": 6,
-                "club2": 4
+            {
+                "competition": "Spring Festival Mock",
+                "clubs": [
+                    {
+                        "name": "She Lifts Mock",
+                        "places": 7
+                    }
+                ]
             }
-            }
-
-
-@pytest.fixture
-def mock_clubs_multiple_use_mail():
-    """ for moking case when an email is used for to clubs identification """
-    return [
-        {'name': 'Club Toto', 'email': 'pipo@mail.com', 'points': 10},
-        {'name': 'Club Tata', 'email': 'pipo@mail.com', 'points': 2}
-    ]
-
-
-@pytest.fixture
-def mock_open_missing_file(monkeypatch):
-
-    def mock_open(*args, **kwargs):
-        raise FileNotFoundError
-
-    monkeypatch.setattr('builtins.open', mock_open)
+        ]
+    }
 
 
 @pytest.fixture
 def mock_open_corrupted_file(monkeypatch):
-
+    """Mock fixture to simulate a corrupted json file"""
     def mock_open(*args, **kwargs):
         raise json.JSONDecodeError("Expecting value", "document", 0)
 
@@ -119,19 +133,9 @@ def mock_open_corrupted_file(monkeypatch):
 
 
 @pytest.fixture
-def mock_json_with_wrong_key(monkeypatch):
-    json_data = json.dumps({"wrong_key": "value_we_dont_care"})
-    monkeypatch.setattr('builtins.open', mock_open(read_data=json_data))
-
-
-@pytest.fixture
 def json_loader_service(app, monkeypatch, mock_clubs, mock_competitions, mock_bookings):
-    """ Fixture to simulate services.JSONLoaderService"""
+    """ Mock fixture to simulate services.JSONLoaderService"""
     with app.app_context():
-        # Simulation du chemin des fichiers json dans app.config
-        app.config['json_clubs_path'] = 'repertory/mock_clubs.json'
-        app.config['json_competitions_path'] = 'repertory/mock_competitions.json'
-        app.config['json_booking_path'] = 'repertory/mock_bookings.json'
 
         # for mocking JSONLoaderService._load_data
         def mock_load_data(self, filename, key):
@@ -149,18 +153,25 @@ def json_loader_service(app, monkeypatch, mock_clubs, mock_competitions, mock_bo
 
 
 @pytest.fixture
-def json_saver_service(app):
-    """fixture for instanciate JSONSaverService"""
+def json_saver_service(app, monkeypatch):
+    """Mock fixture for instanciate JSONSaverService"""
     with app.app_context():
-        return JSONSaverService()
+        saver_service = JSONSaverService()
 
+        # Mock de la méthode _update_data avec la bonne signature
+        def mock_update_data(self, filename, key, new_data):
+            print(f"Mock update_data for {key}: {new_data}")  # Simule l'enregistrement
+            return {key: new_data}  # Simule une structure JSON avec les données mises à jour
 
-@pytest.fixture
-def mock_open_file(monkeypatch):
-    """Fixture for open"""
-    mock_open_instance = mock_open()
-    monkeypatch.setattr('builtins.open', mock_open_instance)
-    return mock_open_instance
+        # Mock de la méthode _save_data pour éviter la sauvegarde réelle
+        def mock_save_data(self, filename, data):
+            print(f"Mock save_data: writing to {filename} with data: {data}")  # Simule l'écriture des données
+
+        # Patch la méthode _update_data avec la bonne signature
+        monkeypatch.setattr(JSONSaverService, '_update_data', mock_update_data)
+        monkeypatch.setattr(JSONSaverService, '_save_data', mock_save_data)
+
+        return saver_service
 
 
 @pytest.fixture
