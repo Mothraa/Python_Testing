@@ -2,9 +2,6 @@ import os
 
 from dotenv import load_dotenv
 
-# # doublon avec .flaskenv
-# DEBUG = True
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 load_dotenv()
