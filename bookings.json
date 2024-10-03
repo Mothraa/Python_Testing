@@ -1,17 +1,28 @@
 {
-    "bookings": [
-        {
-            "competition": "Fall Classic 2025",
-            "clubs": {
-                "She Lifts": 9
+    "bookings": {
+        "bookings": [
+            {
+                "competition": "Fall Classic 2025",
+                "clubs": [
+                    {
+                        "name": "Simply Lift",
+                        "places": 6
+                    },
+                    {
+                        "name": "Iron Temple",
+                        "places": 3
+                    }
+                ]
+            },
+            {
+                "competition": "Spring Festival",
+                "clubs": [
+                    {
+                        "name": "She Lifts",
+                        "places": 7
+                    }
+                ]
             }
-        },
-        {
-            "competition": "Spring Festival 2026",
-            "clubs": {
-                "She Lifts": -4,
-                "Simply Lift": 1
-            }
-        }
-    ]
+        ]
+    }
 }

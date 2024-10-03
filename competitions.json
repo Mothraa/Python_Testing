@@ -13,12 +13,7 @@
         {
             "name": "Fall Classic 2025",
             "date": "2025-10-22 13:30:00",
-            "numberOfPlaces": 9
-        },
-        {
-            "name": "Spring Festival 2026",
-            "date": "2026-10-22 13:30:00",
-            "numberOfPlaces": 23
+            "numberOfPlaces": 12
         }
     ]
 }
